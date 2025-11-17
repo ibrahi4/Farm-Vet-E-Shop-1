@@ -1,3 +1,4 @@
+// src/App.jsx
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./Authcomponents/ProtectedRoute";
 import Navbar from "./components/layout/Navbar";
@@ -14,23 +15,24 @@ import Products from "./pages/Products";
 import Favorites from "./pages/Favorites";
 import Cart from "./pages/Cart";
 import ProductDetails from "./pages/ProductDetails";
+
+// checkout + orders
+import Checkout from "./pages/Checkout";
+//import OrderConfirmed from "./pages/OrderConfirmed";
+
 // admin pages
 import AdminLayout from "./admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminProductForm from "./pages/admin/AdminProductForm";
 import AdminCategories from "./pages/admin/AdminCategories";
-
+import OrderDetails from "./features/orders/OrderDetails";
 export default function App() {
   return (
     <div className="min-h-screen transition-colors duration-300">
-      {/* Navbar */}
       <Navbar />
-
-      {/* Toast Notifications */}
       <Toaster position="top-right" reverseOrder={false} />
 
-      {/* Routes */}
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -38,6 +40,9 @@ export default function App() {
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/products/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/orders/:orderId" element={<OrderDetails />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/reset" element={<Reset />} />

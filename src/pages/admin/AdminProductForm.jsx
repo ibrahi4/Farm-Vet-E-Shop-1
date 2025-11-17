@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import PageHeader from "../../admin/PageHeader";
-import { useProduct } from "../../hooks/useProduct";
+import { useProduct } from "../../hooks/useProduct.js";
 import {
   useAddProduct,
   useUpdateProduct,
@@ -33,23 +33,23 @@ export default function AdminProductForm() {
   const initial =
     isEdit && product
       ? {
-          title: product.title || "",
-          description: product.description || "",
-          thumbnailUrl: product.thumbnailUrl || "",
-          price: product.price ?? 0,
-          currency: product.currency || "USD",
-          categoryId: product.categoryId || "",
-          isAvailable: !!product.isAvailable,
-        }
+        title: product.title || "",
+        description: product.description || "",
+        thumbnailUrl: product.thumbnailUrl || "",
+        price: product.price ?? 0,
+        currency: product.currency || "USD",
+        categoryId: product.categoryId || "",
+        isAvailable: !!product.isAvailable,
+      }
       : {
-          title: "",
-          description: "",
-          thumbnailUrl: "",
-          price: 0,
-          currency: "USD",
-          categoryId: "",
-          isAvailable: true,
-        };
+        title: "",
+        description: "",
+        thumbnailUrl: "",
+        price: 0,
+        currency: "USD",
+        categoryId: "",
+        isAvailable: true,
+      };
 
   const actions = (
     <div className="flex items-center gap-2">

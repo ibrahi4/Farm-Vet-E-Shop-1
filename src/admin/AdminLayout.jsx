@@ -66,7 +66,7 @@ export default function AdminLayout() {
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              <AdminSidebar collapsed={collapsed} onNavigate={() => {}} />
+              <AdminSidebar collapsed={collapsed} onNavigate={() => { }} />
             </div>
           </div>
         </aside>

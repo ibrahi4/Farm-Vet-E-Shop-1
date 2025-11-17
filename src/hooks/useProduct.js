@@ -1,15 +1,15 @@
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import { fetchProducts } from "../features/products/productsSlice.js";
+import { useQuery } from "@tanstack/react-query";
+import { db } from "../services/firebase.js";
+import { doc, getDoc } from "firebase/firestore";
 
-const useProducts = () => {
-  const dispatch = useDispatch();
-  const { items, loading, error } = useSelector(state => state.products);
-
-  useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
-
-  return { items, loading, error };
-};
-export default useProducts;
+export function useProduct(id) {
+  return useQuery({
+    queryKey: ["product", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const snap = await getDoc(doc(db, "products", id));
+      return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+    },
+    staleTime: 15_000,
+  });
+}

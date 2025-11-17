@@ -175,7 +175,7 @@ function SideLink({
           linkBase,
           isActive
             ? "pl-3 before:absolute before:left-0 before:top-1/2 before:h-5 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-[#018218] " +
-              linkActive
+            linkActive
             : linkIdle,
           collapsed ? "justify-center pl-0" : "",
         ].join(" ")

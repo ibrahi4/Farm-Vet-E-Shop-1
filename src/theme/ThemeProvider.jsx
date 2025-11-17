@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useTheme as Usetheme } from "react";
 
-const ThemeCtx = createContext({ theme: "light", toggle: () => {} });
+const ThemeCtx = createContext({ theme: "light", toggle: () => { } });
 export const UseTheme = () => useContext(ThemeCtx);
 
 export default function ThemeProvider({ children }) {

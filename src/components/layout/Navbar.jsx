@@ -38,8 +38,8 @@ export default function Navbar() {
         ? "bg-[#0b1616]/80 text-[#B8E4E6] backdrop-blur-md shadow-[0_2px_15px_rgba(184,228,230,0.15)]"
         : "bg-[#0e1b1b]/85 text-[#B8E4E6] backdrop-blur-md"
       : scrolled
-      ? "bg-[#101d1d]/85 text-[#B8E4E6] backdrop-blur-md"
-      : "bg-[#142727]/85 text-[#B8E4E6] backdrop-blur-md";
+        ? "bg-[#101d1d]/85 text-[#B8E4E6] backdrop-blur-md"
+        : "bg-[#142727]/85 text-[#B8E4E6] backdrop-blur-md";
 
   return (
     <header
@@ -59,10 +59,9 @@ export default function Navbar() {
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `text-sm font-medium transition ${
-                isActive
-                  ? "underline font-semibold text-[#B8E4E6]"
-                  : "hover:text-white/90"
+              `text-sm font-medium transition ${isActive
+                ? "underline font-semibold text-[#B8E4E6]"
+                : "hover:text-white/90"
               }`
             }
           >
@@ -71,10 +70,9 @@ export default function Navbar() {
           <NavLink
             to="/products"
             className={({ isActive }) =>
-              `text-sm font-medium transition ${
-                isActive
-                  ? "underline font-semibold text-[#B8E4E6]"
-                  : "hover:text-white/90"
+              `text-sm font-medium transition ${isActive
+                ? "underline font-semibold text-[#B8E4E6]"
+                : "hover:text-white/90"
               }`
             }
           >
