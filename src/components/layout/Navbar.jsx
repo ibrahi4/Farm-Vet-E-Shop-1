@@ -1,26 +1,20 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
+// eslint-disable-next-line
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentUser, signOut } from "../../features/auth/authSlice";
 import { UseTheme } from "../../theme/ThemeProvider";
 import { motion as Motion, AnimatePresence } from "framer-motion";
+import { FiHeart, FiShoppingCart, FiBell, FiUser } from "react-icons/fi";
+import toast from "react-hot-toast";
 import i18n from "../../i18n";
 import { useTranslation } from "react-i18next";
 
 import SearchBar from "../search/SearchBar";
 import Button from "../../components/ui/Button";
-
-// أيقونات احترافية من react-icons
-import {
-  AiOutlineHome,
-  AiOutlineAppstore,
-  AiOutlineLogout,
-  AiOutlineUser,
-  AiOutlineMenu,
-  AiOutlineClose,
-  AiOutlineShopping,
-  AiOutlineHeart,
-} from "react-icons/ai";
+import { useNotifications } from "../../hooks/useNotifications";
+import MessageBadge from "../../pages/admin/MessagesBadge";
+import { FiMail } from "react-icons/fi";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -28,30 +22,20 @@ export default function Navbar() {
   const [currentLang, setCurrentLang] = useState(i18n.language || "en");
 
   const { theme, toggle } = UseTheme();
+
   const user = useSelector(selectCurrentUser);
   const cart = useSelector((state) => state.cart.items);
-  const favorites = useSelector((state) => state.favorites);
+  const favorites = useSelector((state) => state.favorites.items);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
+  // eslint-disable-next-line
+  const { unreadCount, connectionError } = useNotifications({
+    uid: user?.uid,
+    role: user?.role,
+  });
 
-  const isAdmin = user?.role === "admin";
-  const isDark = theme === "dark";
-
-  // إخفاء Navbar في صفحات الدخول أو التسجيل
-  const hideNavbar = ["/login", "/register", "/reset"].includes(
-    location.pathname
-  );
-
-  // حساب عدد المنتجات في الكارت
-  const cartCount = cart.reduce((sum, i) => sum + (i.quantity || 1), 0);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const toggleLanguage = async () => {
     const newLang = currentLang === "en" ? "ar" : "en";
@@ -62,116 +46,114 @@ export default function Navbar() {
 
   const handleLogout = () => {
     dispatch(signOut());
-    navigate("/");
+    toast.success(t("navbar.logout_success"));
   };
 
-  const navbarBg = isDark
-    ? scrolled
-      ? "bg-gray-900/90 text-white shadow-md"
-      : "bg-gray-900/80 text-white"
-    : scrolled
-    ? "bg-white/90 text-gray-900 shadow-md"
-    : "bg-white/95 text-gray-800";
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  const btnBg = isDark
-    ? "bg-gray-700 hover:bg-gray-600 text-white"
-    : "bg-emerald-500 hover:bg-emerald-600 text-white";
 
-  const linkBase =
-    "flex items-center gap-1 px-3 py-2 rounded-md transition-colors";
-  const linkActive = isDark
-    ? "bg-gray-800 text-white"
-    : "bg-emerald-100 text-emerald-700";
-  const linkIdle = isDark
-    ? "hover:bg-gray-800 text-gray-200"
-    : "hover:bg-emerald-50 text-gray-800";
+  useEffect(() => {
+    if (connectionError) {
+      toast.error(t("navbar.notification_error"), {
+        duration: 6000,
+      });
+    }
+  }, [connectionError]);
 
-  if (hideNavbar) return null;
+  const isDark = theme === "dark";
+
+  const navbarColorDark =
+    "bg-[#0c1717]/45 backdrop-blur-2xl text-[#B8E4E6] shadow-[0_2px_5px_rgba(0,0,0,0.45)] border-b border-white/10";
+
+  const navbarColorLight =
+    "bg-[#123033]/55 backdrop-blur-2xl text-[#B8E4E6] shadow-[0_6px_20px_rgba(0,0,0,0.28)] border-b border-white/12";
+
+  const navbarBg = `
+    ${isDark ? navbarColorDark : navbarColorLight}
+    ${scrolled ? "shadow-xl border-b border-white/20" : ""}
+  `;
+
+  const mobileMenuBg = isDark
+    ? "bg-[#0e1b1b]/95 backdrop-blur-xl text-[#B8E4E6]"
+    : "bg-[#142727]/95 backdrop-blur-xl text-[#B8E4E6]";
+
+  const subtleControlBg =
+    "bg-white/20 hover:bg-white/30 text-white transition";
+
+  const navLinkBase = "text-sm font-semibold tracking-tight transition-colors";
+  const navLinkActive = "text-white";
+  const navLinkIdle = "text-[#B8E4E6]/80 hover:text-white";
+
+  const cartCount = Array.isArray(cart) ? cart.reduce((s, i) => s + (i.quantity || 1), 0) : 0;
 
   return (
-    <header className={`sticky top-0 z-50 border-b ${navbarBg}`}>
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
-        {/* Logo */}
-        <div
-          className="cursor-pointer flex items-center"
-          onClick={() => {
-            navigate("/");
-            setMobileOpen(false);
-          }}
-        >
-          <AiOutlineAppstore size={28} className="mr-2" />
-          <span className="text-xl font-bold">Farm Vet Shop</span>
-        </div>
+    <header
+      className={`sticky top-0 z-50 transition-all duration-500 ${navbarBg}`}
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap px-4 sm:px-6 md:px-8 py-3 gap-y-3">
+        
+        {/* 🌿 Logo */}
+        <NavLink className="text-lg sm:text-xl font-semibold tracking-tight" to="/">
+          🌿 {t("brand.name")}
+        </NavLink>
 
-        {/* Desktop menu */}
-        <nav className="hidden md:flex items-center space-x-4">
+        {/* 🧭 Desktop Nav */}
+        <nav className="hidden lg:flex items-center gap-x-6 lg:gap-x-6">
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `${linkBase} ${isActive ? linkActive : linkIdle}`
+              `${navLinkBase} ${isActive ? navLinkActive : navLinkIdle}`
             }
           >
-            <AiOutlineHome size={20} />
-            {t("nav.home") || "Home"}
+            {t("nav.home", "Home")}
           </NavLink>
 
-          <NavLink
-            to="/products"
-            className={({ isActive }) =>
-              `${linkBase} ${isActive ? linkActive : linkIdle}`
-            }
-          >
-            <AiOutlineAppstore size={20} />
-            {t("nav.products") || "Products"}
-          </NavLink>
+          <NavLink to="/products" className={({ isActive }) =>
+            `${navLinkBase} ${isActive ? navLinkActive : navLinkIdle}`}>{t("nav.products")}</NavLink>
 
-          {isAdmin && (
-            <NavLink
-              to="/admin"
-              className={({ isActive }) =>
-                `${linkBase} ${isActive ? linkActive : linkIdle}`
-              }
-            >
-              <AiOutlineUser size={20} />
-              {t("nav.admin") || "Admin"}
+          <NavLink to="/articles" className={({ isActive }) =>
+            `${navLinkBase} ${isActive ? navLinkActive : navLinkIdle}`}>{t("nav.articles", "Articles")}</NavLink>
+
+          {user?.role === "admin" && (
+            <NavLink className={`${navLinkBase} ${navLinkIdle}`} to="/admin">
+              {t("admin.dashboard")}
             </NavLink>
           )}
         </nav>
 
-        {/* Controls */}
-        <div className="flex items-center gap-3">
-          {/* Search */}
-          <div className="hidden sm:block w-40 md:w-52">
-            <SearchBar placeholder={t("nav.search") || "Search..."} />
+        {/* 🎛 Controls */}
+        <div className="flex items-center gap-2 sm:gap-4 md:gap-1 lg:gap-1">
+
+          {/* 🔍 Search */}
+          <div className="hidden lg:block w-73 xl:w-90">
+            <SearchBar placeholder={t("navbar.search_placeholder")} />
           </div>
 
-          {/* Language toggle */}
-          <button
-            onClick={toggleLanguage}
-            className={`h-10 w-10 flex items-center justify-center rounded-lg ${btnBg}`}
-          >
+          {/* Lang */}
+          <button onClick={toggleLanguage} className={`h-9 w-9 rounded-lg flex items-center justify-center ${subtleControlBg}`}>
             {currentLang === "en" ? "🇺🇸" : "🇸🇦"}
           </button>
 
-          {/* Theme toggle */}
-          <button
-            onClick={toggle}
-            className={`h-10 w-10 flex items-center justify-center rounded-lg ${btnBg}`}
-          >
-            {isDark ? "🌙" : "☀️"}
+          {/* Theme */}
+          <button onClick={toggle} className={`h-9 w-9 rounded-lg flex items-center justify-center ${subtleControlBg}`}>
+            {theme === "dark" ? "🌙" : "☀️"}
           </button>
 
           {/* Favorites */}
           <button
-            onClick={() => {
-              navigate("/analysis-dashboard");
-              setMobileOpen(false);
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/favorites");
             }}
-            className={`relative h-10 w-10 flex items-center justify-center rounded-lg ${btnBg}`}
+            className={`relative h-9 w-9 rounded-lg flex items-center justify-center ${subtleControlBg}`}
           >
-            <AiOutlineHeart size={20} />
+            <FiHeart size={18} />
             {favorites.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-xs text-white rounded-full px-1">
+              <span className="absolute -top-1 -right-1 bg-pink-500 text-xs rounded-full px-1">
                 {favorites.length}
               </span>
             )}
@@ -179,71 +161,90 @@ export default function Navbar() {
 
           {/* Cart */}
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               navigate("/cart");
-              setMobileOpen(false);
             }}
-            className={`relative h-10 w-10 flex items-center justify-center rounded-lg ${btnBg}`}
+            className={`relative h-9 w-9 rounded-lg flex items-center justify-center ${subtleControlBg}`}
           >
-            <AiOutlineShopping size={22} />
+            <FiShoppingCart size={18} />
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-cyan-600 text-xs text-white rounded-full px-1">
+              <span className="absolute -top-1 -right-1 bg-cyan-600 text-xs rounded-full px-1">
                 {cartCount}
               </span>
             )}
           </button>
 
-          {/* Account / Auth */}
-          {user ? (
+          {/* Admin Messages Icon */}
+          {user?.role === "admin" && (
+            <button
+              onClick={() => navigate("/admin/messages")}
+              className="relative h-9 w-9 rounded-lg flex items-center justify-center bg-white/20 hover:bg-white/30 text-white"
+            >
+              <FiMail size={18} />
+
+              {/* Notification Badge */}
+              <span className="absolute -top-1 -right-1">
+                <MessageBadge />
+              </span>
+            </button>
+          )}
+
+
+
+          {/* 👤 Account Icon */}
+          {user && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/account/settings");
+              }}
+              className="flex h-9 w-9 rounded-full items-center justify-center bg-white/20 hover:bg-white/30 text-white"
+            >
+              <FiUser size={18} />
+            </button>
+          )}
+
+          {/* 🔐 LOGIN / REGISTER (Desktop) */}
+          {!user && (
             <>
-              <button
-                onClick={() => {
-                  navigate("/account/settings");
-                  setMobileOpen(false);
-                }}
-                className={`flex items-center gap-1 px-3 py-1 rounded-md ${btnBg}`}
-              >
-                <AiOutlineUser size={18} />
-                {t("nav.account") || "Account"}
-              </button>
               <Button
-                text={t("Logout") || "Logout"}
-                onClick={handleLogout}
-                className="px-3 py-1 rounded-md bg-red-600 hover:bg-red-500 text-white"
-              />
-            </>
-          ) : (
-            <>
-              <Button
-                text={t("Login") || "Login"}
-                onClick={() => {
+                text={t("auth.login")}
+                onClick={(e) => {
+                  e.preventDefault();
                   navigate("/login");
-                  setMobileOpen(false);
                 }}
-                className="px-3 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white"
+                className="hidden md:block px-3 py-1 text-sm bg-[#2F7E80] text-white hover:bg-[#236a6c]"
               />
-              <NavLink
-                to="/register"
-                onClick={() => setMobileOpen(false)}
-                className={`px-3 py-1 rounded-md ${
-                  isDark ? "text-gray-200" : "text-gray-800"
-                } hover:underline`}
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/register");
+                }}
+                className="hidden md:block text-sm underline opacity-80 hover:opacity-100"
               >
-                {t("Register") || "Register"}
-              </NavLink>
+                {t("auth.register")}
+              </button>
             </>
           )}
 
-          {/* Mobile menu toggle */}
+          {/* 🚪 LOGOUT (Desktop) */}
+          {user && (
+            <button
+              onClick={handleLogout}
+              className="hidden md:block px-3 py-1 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              {t("auth.logout")}
+            </button>
+          )}
+
+          {/* 📱 Mobile Menu Button */}
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className={`md:hidden h-10 w-10 flex items-center justify-center rounded-lg ${btnBg}`}
+            onClick={() => setMobileOpen((o) => !o)}
+            className={`lg:hidden h-10 w-10 rounded-lg ${subtleControlBg}`}
           >
-            {mobileOpen ? (
-              <AiOutlineClose size={24} />
-            ) : (
-              <AiOutlineMenu size={24} />
-            )}
+            ☰
           </button>
         </div>
       </div>
@@ -252,88 +253,121 @@ export default function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <Motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className={`md:hidden px-6 py-4 ${
-              isDark ? "bg-gray-900" : "bg-white"
-            }`}
+            exit={{ opacity: 0, y: -8 }}
+            className={`lg:hidden border-t border-white/10 ${mobileMenuBg}`}
           >
-            <div className="flex flex-col gap-4">
-              <NavLink
-                to="/"
-                onClick={() => setMobileOpen(false)}
-                className={linkBase}
-              >
-                <AiOutlineHome size={20} />
-                {t("nav.home") || "Home"}
-              </NavLink>
+            <div className="px-6 py-4 flex flex-col gap-4">
 
-              <NavLink
-                to="/products"
-                onClick={() => setMobileOpen(false)}
-                className={linkBase}
-              >
-                <AiOutlineAppstore size={20} />
-                {t("nav.products") || "Products"}
-              </NavLink>
+              <SearchBar placeholder={t("navbar.search_placeholder")} />
 
-              {isUserLoaded && isAdmin && (
-                <NavLink
-                  to="/admin"
-                  onClick={() => setMobileOpen(false)}
-                  className={linkBase}
-                >
-                  <AiOutlineUser size={20} />
-                  {t("nav.admin") || "Admin Dashboard"}
-                </NavLink>
+              <button
+                onClick={() => {
+                  toggleLanguage();
+                  setMobileOpen(false);
+                }}
+                className="flex items-center gap-3 py-2"
+              >
+                🌐 {currentLang === "en" ? t("languages.switch_to_ar") : t("languages.switch_to_en")}
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMobileOpen(false);
+                  navigate("/favorites");
+                }}
+                className="py-2 text-left w-full"
+              >
+                ❤️ {t("navbar.favorites")}
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMobileOpen(false);
+                  navigate("/cart");
+                }}
+                className="py-2 text-left w-full"
+              >
+                🛒 {t("navbar.cart")}
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMobileOpen(false);
+                  navigate("/articles");
+                }}
+                className="py-2 text-left w-full"
+              >
+                📰 {t("nav.articles", "Articles")}
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMobileOpen(false);
+                  navigate("/notifications");
+                }}
+                className="py-2 text-left w-full"
+              >
+                🔔 {t("navbar.notifications")}
+              </button>
+
+              {user && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMobileOpen(false);
+                      navigate("/account/settings");
+                    }}
+                    className="py-2 text-left w-full"
+                  >
+                    👤 {t("navbar.account")}
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleLogout();
+                      setMobileOpen(false);
+                    }}
+                    className="text-red-400 py-2 text-left w-full"
+                  >
+                    🚪 {t("navbar.logout")}
+                  </button>
+                </>
               )}
 
-              {user && !isAdmin && (
-                <NavLink
-                  to="/account/orders"
-                  onClick={() => setMobileOpen(false)}
-                  className={linkBase}
-                >
-                  {t("nav.myOrders") || "My Orders"}
-                </NavLink>
+              {!user && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMobileOpen(false);
+                      navigate("/login");
+                    }}
+                    className="py-2 text-left w-full"
+                  >
+                    🔐 {t("navbar.login")}
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMobileOpen(false);
+                      navigate("/register");
+                    }}
+                    className="py-2 text-left w-full"
+                  >
+                    📝 {t("navbar.register")}
+                  </button>
+                </>
               )}
 
-              <NavLink
-                to="/favorites"
-                onClick={() => setMobileOpen(false)}
-                className={linkBase}
-              >
-                <AiOutlineHeart size={20} />
-                {t("nav.favorites") || "Favorites"}
-              </NavLink>
-
-              <NavLink
-                to="/cart"
-                onClick={() => setMobileOpen(false)}
-                className={linkBase}
-              >
-                <AiOutlineShopping size={20} />
-                {t("nav.cart") || "Cart"}
-              </NavLink>
-
-              {user ? (
-                <button
-                  onClick={handleLogout}
-                  className={`${linkBase} text-red-500`}
-                >
-                  <AiOutlineLogout size={20} />
-                  {t("nav.logout") || "Logout"}
-                </button>
-              ) : (
-                <NavLink
-                  to="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className={linkBase}
-                >
-                  {t("nav.login") || "Login"}
-                </NavLink>
-              )}
             </div>
           </Motion.div>
         )}

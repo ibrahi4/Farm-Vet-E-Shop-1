@@ -3,13 +3,15 @@ import { Suspense, lazy } from "react";
 import ProtectedRoute from "./Authcomponents/ProtectedRoute";
 import Navbar from "./components/layout/Navbar";
 import { Toaster } from "react-hot-toast";
-import AdminMessages from "./pages/admin/AdminMessages";
+
+// import AdminMessages from "./pages/admin/AdminMessages";
 
 // Lazy load all components for better performance
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Reset = lazy(() => import("./pages/Reset"));
 const Home = lazy(() => import("./pages/Home"));
+const AiConversations = lazy(() =>import("./pages/account/AiConversations"));
 
 const Products = lazy(() => import("./pages/Products"));
 const Favorites = lazy(() => import("./pages/Favorites"));
@@ -41,8 +43,10 @@ const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
 const AdminArticles = lazy(() => import("./pages/admin/AdminArticles"));
 const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
+const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
+
 const ChatBot = lazy(() => import("./components/Ai/ChatBot"));
-const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
+// const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 // Loading component for Suspense fallback
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -115,6 +119,7 @@ export default function App() {
               <Route path="AdminOrders" element={<AdminOrders />} />
               <Route path="categories" element={<AdminCategories />} />
               <Route path="articles" element={<AdminArticles />} />
+              <Route path="messages" element={<AdminMessages />} />
             </Route>
           </Route>
 
