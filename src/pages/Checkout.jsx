@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../services/firebase";
-import { clearCart } from "../features/cart/cartSlice";
+import { finalizeOrderLocal } from "../features/cart/cartSlice";
 import useOrders from "../hooks/useOrders";
 import toast from "react-hot-toast";
 import Modal from "../components/ui/Modal";
@@ -354,7 +354,8 @@ export default function Checkout() {
               Back to Cart
             </Link>
             <button
-              type="submit"
+              type="button"
+              onClick={handleConfirm}
               disabled={loading}
               className="inline-flex items-center rounded-2xl bg-emerald-500 px-6 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-600 disabled:opacity-70"
             >
@@ -499,4 +500,4 @@ export default function Checkout() {
       </div>
     </div>
   );
-};
+}

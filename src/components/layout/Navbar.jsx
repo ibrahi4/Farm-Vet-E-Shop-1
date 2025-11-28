@@ -27,14 +27,13 @@ export default function Navbar() {
   const cart = useSelector((state) => state.cart.items);
   const favorites = useSelector((state) => state.favorites.items);
 
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useTranslation();
   // eslint-disable-next-line
   const { unreadCount, connectionError } = useNotifications({
     uid: user?.uid,
-    role: user?.isAdmin ? "admin" : user?.role,
+    role: user?.role,
   });
 
 
@@ -119,7 +118,7 @@ export default function Navbar() {
           <NavLink to="/articles" className={({ isActive }) =>
             `${navLinkBase} ${isActive ? navLinkActive : navLinkIdle}`}>{t("nav.articles", "Articles")}</NavLink>
 
-          {(user?.isAdmin === true) && (
+          {user?.role === "admin" && (
             <NavLink className={`${navLinkBase} ${navLinkIdle}`} to="/admin">
               {t("admin.dashboard")}
             </NavLink>
