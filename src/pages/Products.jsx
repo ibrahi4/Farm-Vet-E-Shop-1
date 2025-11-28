@@ -14,9 +14,10 @@ import {
 import { useProductsSorted } from "../hooks/useProductsSorted";
 import { usePagination } from "../hooks/usePagination";
 import Pager from "../admin/Pager";
-import { toggleFavourite } from "../features/favorites/favoritesSlice";
-import { addToCart } from "../features/cart/cartSlice";
 import { getFallbackProducts } from "../data/products";
+import ProductCard from "../components/cards/ProductCard";
+import Footer from "../components/layout/Footer";
+import { UseTheme } from "../theme/ThemeProvider";
 
 const SORT_FIELDS = [
   { value: "createdAt", label: "Newest" },
@@ -30,6 +31,7 @@ export default function Products() {
   const [dir, setDir] = useState("desc");
   const [pageSize, setPageSize] = useState(6);
 
+  const { theme } = UseTheme();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -46,7 +48,6 @@ export default function Products() {
     data: all = [],
     isLoading,
     isError,
-    error,
   } = useProductsSorted({ sortBy, dir, qText: q });
   const fallbackCatalog = useMemo(() => getFallbackProducts(), []);
   const usingFallback = useMemo(() => {
@@ -90,9 +91,6 @@ export default function Products() {
     setPage,
     nextPage,
     prevPage,
-    rangeStart,
-    rangeEnd,
-    totalItems,
   } = usePagination(list, pageSize);
 
   const handleToggleFavorite = (product) => dispatch(toggleFavourite(product));
@@ -181,9 +179,11 @@ export default function Products() {
           <div className="rounded-lg border border-white/20 bg-white/10 p-8 text-center text-white/70">
             {t("products.noResults", "No products found.")}
           </div>
-        )}
+        </div>
+      </header>
 
-        {/* Product Grid */}
+      {/* PRODUCT GRID */}
+      <main className="flex-grow max-w-6xl w-full mx-auto pb-10">
         {!isLoading && list.length > 0 && (
           <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {paginatedData.map((p) => {
@@ -280,10 +280,6 @@ export default function Products() {
             />
           </div>
         )}
-      </div>
-    </div>
-  );
-}
 
 function GridSkeleton({ count = 6 }) {
   return (

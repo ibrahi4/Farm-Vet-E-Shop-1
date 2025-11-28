@@ -1,6 +1,9 @@
 import { motion as Motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 export default function Articles({ header, items = [] }) {
+  const { t } = useTranslation();
   // ✨ Animation setup
   const fadeUp = {
     hidden: { opacity: 0, y: 40 },
@@ -56,16 +59,17 @@ export default function Articles({ header, items = [] }) {
               >
                 {a.excerpt}
               </Motion.p>
-              <Motion.button
+              <Motion.div
                 variants={fadeUp}
                 custom={i * 0.2 + 0.3}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                className="text-primary font-bold text-sm mt-2 hover:underline"
-                onClick={() => {}}
               >
-                Read More
-              </Motion.button>
+                <Link
+                  to="/articles"
+                  className="text-primary font-bold text-sm mt-2 hover:underline inline-block"
+                >
+                  {t("home.readMore")}
+                </Link>
+              </Motion.div>
             </div>
           </Motion.div>
         ))}

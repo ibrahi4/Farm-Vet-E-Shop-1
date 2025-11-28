@@ -5,10 +5,12 @@ import { motion as Motion } from "framer-motion";
 import { Heart } from "lucide-react";
 import Button from "../ui/Button";
 import { UseTheme } from "../../theme/ThemeProvider";
+import { useTranslation } from "react-i18next";
 
 export default function ProductCard({ product, index = 0 }) {
   const dispatch = useDispatch();
   const { theme } = UseTheme();
+  const { t } = useTranslation();
 
   // صورة fallback لو المنتج مالوش صورة
   const imageUrl =
@@ -71,7 +73,7 @@ export default function ProductCard({ product, index = 0 }) {
         aria-label="favorite"
         className="absolute top-3 right-3 z-20 p-2 rounded-full shadow-md border backdrop-blur-md bg-white/70 border-gray-200 hover:bg-gray-100 transition"
       >
-        <Heart size={20} className={isFav ? "text-red-600" : "text-gray-400"} />
+        <Heart size={20} className={isFav ? "text-red-600" : "icon-muted"} />
       </Motion.button>
 
       <Motion.div
@@ -94,7 +96,7 @@ export default function ProductCard({ product, index = 0 }) {
 
         <Motion.div variants={fadeUp} custom={0.4}>
           <Button
-            text={inCart ? "In Cart" : "Add to Cart"}
+            text={inCart ? t("products.inCart", "In Cart") : t("products.addToCart", "Add to Cart")}
             full
             disabled={inCart}
             onClick={() => !inCart && dispatch(addToCart(safeProduct(product)))}

@@ -3,6 +3,7 @@ import { Suspense, lazy } from "react";
 import ProtectedRoute from "./Authcomponents/ProtectedRoute";
 import Navbar from "./components/layout/Navbar";
 import { Toaster } from "react-hot-toast";
+import AdminMessages from "./pages/admin/AdminMessages";
 
 // Lazy load all components for better performance
 const Login = lazy(() => import("./pages/Login"));
@@ -29,7 +30,6 @@ const OrderTracking = lazy(() => import("./pages/account/OrderTracking"));
 const OrderHistory = lazy(() => import("./pages/account/OrderHistory"));
 const SavedProducts = lazy(() => import("./pages/account/SavedProducts"));
 const FavoriteArticles = lazy(() => import("./pages/account/FavoriteArticles"));
-const AiConversations = lazy(() => import("./pages/account/AiConversations"));
 const SupportCenter = lazy(() => import("./pages/account/SupportCenter"));
 const Complaints = lazy(() => import("./pages/account/Complaints"));
 const PaymentMethods = lazy(() => import("./pages/account/PaymentMethods"));
@@ -39,6 +39,8 @@ const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
 const AdminProductForm = lazy(() => import("./pages/admin/AdminProductForm"));
 const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
 const AdminArticles = lazy(() => import("./pages/admin/AdminArticles"));
+const AdminComplaints = lazy(() => import("./pages/admin/AdminComplaints"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const ChatBot = lazy(() => import("./components/Ai/ChatBot"));
 const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 // Loading component for Suspense fallback

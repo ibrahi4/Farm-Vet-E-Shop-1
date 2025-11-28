@@ -89,7 +89,7 @@ const Navigation = ({
     : "bg-emerald-50 text-emerald-700 border border-emerald-200";
   const sectionIdleClasses = isDarkMode
     ? "text-slate-300 hover:bg-slate-800/70 hover:text-white"
-    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900";
+    : "text-slate-600 hover:bg-white hover:text-slate-900";
 
   if (variant === "embedded") {
     return (
@@ -109,7 +109,7 @@ const Navigation = ({
                 }`}
                 aria-pressed={isCategoryActive}
               >
-                <CategoryIcon className="h-4 w-4 flex-shrink-0" />
+                <CategoryIcon className="h-4 w-4 flex-shrink-0 icon-primary" />
                 <span className="text-center leading-tight text-[10px] px-1">
                   {getCategoryLabel(category)}
                 </span>
@@ -142,7 +142,7 @@ const Navigation = ({
                   }`}
                   aria-current={isActive ? "true" : undefined}
                 >
-                  <IconComponent className="h-4 w-4 flex-shrink-0" />
+                  <IconComponent className="h-4 w-4 flex-shrink-0 icon-primary" />
                   <div className="flex-1 text-left min-w-0">
                     <div className="font-medium truncate text-sm">{getItemLabel(item)}</div>
                     <div className="text-xs opacity-75 truncate leading-tight">
@@ -211,7 +211,7 @@ const Navigation = ({
                 aria-pressed={isCategoryActive}
               >
                 <span className="inline-flex items-center gap-2">
-                  <CategoryIcon className="h-4 w-4 flex-shrink-0" />
+                  <CategoryIcon className="h-4 w-4 flex-shrink-0 icon-primary" />
                   <span className="truncate">{getCategoryLabel(category)}</span>
                 </span>
               </button>
@@ -234,7 +234,7 @@ const Navigation = ({
             <div key={category.id} className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 <span className="inline-flex items-center gap-2">
-                  <CategoryIcon className="h-4 w-4 flex-shrink-0" />
+                  <CategoryIcon className="h-4 w-4 flex-shrink-0 icon-primary" />
                   <span className="truncate">{getCategoryLabel(category)}</span>
                 </span>
               </p>
@@ -249,11 +249,11 @@ const Navigation = ({
                       className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition ${
                         isActive
                           ? "bg-gradient-to-r from-green-100 to-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-200"
-                          : "text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800/70"
+                          : "text-slate-700 hover:bg-white dark:text-slate-200 dark:hover:bg-slate-800/70"
                       }`}
                       aria-current={isActive ? "true" : undefined}
                     >
-                      <IconComponent className="h-4 w-4 flex-shrink-0" />
+                      <IconComponent className="h-4 w-4 flex-shrink-0 icon-primary" />
                       <div className="flex flex-col text-left min-w-0">
                         <span className="truncate">{getItemLabel(item)}</span>
                         <span className="text-xs font-normal text-slate-500 dark:text-slate-400 truncate">

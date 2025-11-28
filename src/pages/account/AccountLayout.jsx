@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import {
@@ -7,7 +7,6 @@ import {
   Truck,
   Bookmark,
   FileText,
-  Bot,
   LifeBuoy,
   LogOut,
   CreditCard,
@@ -18,6 +17,7 @@ import {
   signOut as signOutThunk,
 } from "../../features/auth/authSlice";
 import { UseTheme } from "../../theme/ThemeProvider";
+import Footer from "../../components/layout/Footer";
 
 const navItems = [
   {
@@ -57,12 +57,6 @@ const navItems = [
     icon: FileText,
   },
   {
-    to: "ai",
-    labelKey: "account.ai_conversations",
-    descriptionKey: "account.ai_description",
-    icon: Bot,
-  },
-  {
     to: "support",
     labelKey: "account.feedback_support",
     descriptionKey: "account.support_description",
@@ -80,7 +74,6 @@ export default function AccountLayout() {
   const user = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const { theme } = UseTheme();
   const isDark = theme === "dark";
   const { t } = useTranslation();
@@ -97,7 +90,6 @@ export default function AccountLayout() {
     navigate("/");
   };
 
-  const isSettingsRoute = location.pathname === "/account/settings";
   const mainBackground = isDark
     ? "bg-slate-950 text-slate-100"
     : "bg-gradient-to-b from-slate-50 via-white to-emerald-50/40 text-slate-900";
@@ -109,28 +101,24 @@ export default function AccountLayout() {
     : "bg-emerald-50 text-emerald-700 ring-emerald-100";
   const helperCard = isDark
     ? "border-slate-700 bg-slate-800/70 text-slate-300"
-    : "border-slate-100 bg-slate-50/70 text-slate-600";
+    : "border-slate-100 bg-white text-slate-600";
   const navActive = isDark
     ? "border-emerald-900/40 bg-emerald-900/30 text-emerald-200 shadow-sm"
     : "border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm";
   const navIdle = isDark
     ? "border-transparent text-slate-300 hover:border-slate-700 hover:bg-slate-800/70"
-    : "border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50";
+    : "border-transparent text-slate-600 hover:border-slate-200 hover:bg-white";
   const navDescription = isDark ? "text-slate-300" : "text-slate-500";
   const logoutButton = isDark
     ? "border-red-900/40 text-red-200 hover:bg-red-900/30"
     : "border-red-200 text-red-600 hover:bg-red-50";
-  const sectionSurface =
-    theme === "dark"
-      ? "bg-slate-900"
-      : isSettingsRoute
-        ? "bg-slate-50"
-        : "bg-white";
+  const sectionSurface = isDark ? "bg-slate-900" : "bg-white";
   const sectionRing = isDark ? "ring-slate-800" : "ring-slate-100";
 
   return (
-    <div className={`min-h-screen py-10 transition-colors ${mainBackground}`}>
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:gap-8 lg:px-8">
+    <div className={`min-h-screen transition-colors ${mainBackground} flex flex-col`}>
+      <div className="flex-1 pt-10 pb-6">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:gap-8 lg:px-8">
         <aside className={`w-full shrink-0 rounded-3xl p-6 shadow-lg ring-1 lg:w-72 ${asideSurface} text-slate-900 dark:text-slate-100`}>
           <div className="flex items-center gap-4">
             <div className={`flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl text-lg font-semibold ring-1 ${avatarSurface}`}>
@@ -196,7 +184,9 @@ export default function AccountLayout() {
         >
           <Outlet />
         </section>
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

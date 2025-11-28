@@ -36,7 +36,7 @@ const OverviewCard = ({ user, profileForm, preferenceForm, scrollToSection }) =>
       chips.push({ label: profileForm.location, tone: "outline" });
     }
     chips.push({
-      label: user?.role === "admin" ? "Administrator" : "Customer",
+      label: user?.isAdmin === true ? "Administrator" : "Customer",
       tone: "solid",
     });
     chips.push({
@@ -151,7 +151,7 @@ const OverviewCard = ({ user, profileForm, preferenceForm, scrollToSection }) =>
             <button
               type="button"
               onClick={() => scrollToSection("security")}
-              className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
             >
               Review security
             </button>

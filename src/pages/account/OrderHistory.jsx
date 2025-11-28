@@ -24,8 +24,10 @@ export default function UserOrders() {
       </div>
     );
 
+  const containerBg = isDark ? "bg-slate-950" : "bg-white";
+
   return (
-    <div className="space-y-6 p-5 min-h-screen bg-green-50">
+    <div className={`space-y-6 p-5 min-h-screen ${containerBg}`}>
       <header>
         <p className="text-sm font-semibold uppercase tracking-wide text-emerald-600">
           Overview

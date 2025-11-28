@@ -96,7 +96,7 @@ export default function OrderTracking() {
   const muted = isDark ? "text-slate-400" : "text-slate-500";
   const infoSurface = isDark
     ? "border-slate-800 bg-slate-900 text-slate-300"
-    : "border-slate-100 bg-slate-50 text-slate-600";
+    : "border-slate-100 bg-white text-slate-600";
   const infoHeading = isDark ? "text-white" : "text-slate-900";
   const connectorColor = isDark ? "bg-slate-800" : "bg-slate-200";
   const formatDateTime = (value, fallback) =>
