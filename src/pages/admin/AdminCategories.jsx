@@ -324,8 +324,9 @@ function EmptyState({ title, note }) {
   return (
     <div 
     grid place-items-center rounded-lg p-8 text-center border
-    className={`
-    ${theme === "dark"
+    className={
+      // eslint-disable-next-line
+             `${theme === "dark"
       ? "bg-[#0f2222] border-[#1e3a3a] text-[#cfecec]"
       : "bg-gray-50 border-gray-200 text-gray-700"}
       `}

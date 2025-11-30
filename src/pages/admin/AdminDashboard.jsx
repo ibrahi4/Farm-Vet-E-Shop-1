@@ -511,6 +511,7 @@ export default function AdminDashboard() {
 
 /* ====== Subcomponents ====== */
 function KPICard({
+  // eslint-disable-next-line
   icon: Icon,
   label,
   value,

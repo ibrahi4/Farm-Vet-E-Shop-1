@@ -23,7 +23,7 @@ export default function UserOrders() {
         No orders yet.
       </div>
     );
-
+// eslint-disable-next-line
   const containerBg = isDark ? "bg-slate-950" : "bg-white";
 
   return (

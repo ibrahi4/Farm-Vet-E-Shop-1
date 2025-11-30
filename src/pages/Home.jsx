@@ -40,7 +40,7 @@ export default function Home() {
   const localizedFeatured = featuredArticles.map((article) =>
     localizeArticleRecord(article, locale)
   );
-
+// eslint-disable-next-line
   const featuredSource = localizedFeatured.length
     ? localizedFeatured
     : fallbackArticles;

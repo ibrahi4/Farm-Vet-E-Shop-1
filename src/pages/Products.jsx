@@ -8,7 +8,7 @@ import { usePagination } from "../hooks/usePagination";
 import Pager from "../admin/Pager";
 import { getFallbackProducts } from "../data/products";
 import ProductCard from "../components/cards/ProductCard";
-import Footer from "../../src/components/layout/footer";
+import Footer from "../../src/components/layout/Footer";
 import { UseTheme } from "../theme/ThemeProvider";
 
 const SORT_FIELDS = [
