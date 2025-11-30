@@ -6,8 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../features/auth/authSlice";
 import { db } from "../../services/firebase";
-import { useUserOrders } from "../../hooks/useUserOrders";
-
+import userOrders from "../../hooks/useUserOrders";
 const buildTrackingUrl = (trackingNumber) =>
   `https://www.17track.net/en#nums=${encodeURIComponent(trackingNumber)}`;
 
@@ -20,7 +19,7 @@ export default function OrderTracking() {
   const orderIdQuery = query.get("orderId");
   const isDark = theme === "dark";
   const user = useSelector(selectCurrentUser);
-  const { orders, loading } = useUserOrders(user?.uid);
+  const { orders, loading } = userOrders(user?.uid);
   const [order, setOrder] = useState(null);
 
   const targetOrderId = useMemo(
@@ -57,6 +56,7 @@ export default function OrderTracking() {
   };
 
   const baseSteps = [
+    { key: "pending", label: t("tracking.steps.orderPlaced", "Order Placed") },
     { key: "processing", label: t("tracking.steps.processing", "Processing") },
     { key: "shipped", label: t("tracking.steps.shipped", "Shipped") },
     { key: "out_for_delivery", label: t("tracking.steps.outForDelivery", "Out for Delivery") },
@@ -65,7 +65,7 @@ export default function OrderTracking() {
 
   const statusOrder = baseSteps.map((step) => step.key);
   const currentStatusIndex = order
-    ? statusOrder.indexOf(order.status || "processing")
+    ? statusOrder.indexOf(order.status?.toLowerCase() || "pending")
     : 0;
   const timelineSteps = baseSteps.map((step, index) => {
     let state = "pending";
