@@ -16,7 +16,7 @@ The platform combines modern frontend architecture, Firebase backend services, a
 
 ---
 
-### 🛒 E-Commerce Functionality
+### E-Commerce Functionality
 - Browse and view products
 - Advanced search and filtering
 - Shopping cart with quantity management
@@ -51,7 +51,7 @@ The platform combines modern frontend architecture, Firebase backend services, a
 - Helps admins make **data-driven decisions**
 - Improves inventory planning and product prioritization
 
-### 💬 Smart Recommendation Chatbot
+###  Smart Recommendation Chatbot
 - AI-powered chatbot integrated into the platform
 - Recommends the **best products** based on:
   - User preferences
