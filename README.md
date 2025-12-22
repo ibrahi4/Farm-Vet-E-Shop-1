@@ -1,16 +1,103 @@
-# React + Vite
+#  Farm-Vet E-Shop
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Farm-Vet E-Shop is a **full-stack e-commerce platform** designed for the **veterinary and farm supplies industry**, providing a secure, scalable, and intelligent shopping experience.  
+The platform combines modern frontend architecture, Firebase backend services, and **AI-powered features** for data analysis and product recommendations.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+##  Key Features
 
-## React Compiler
+###  Authentication & Authorization
+- User registration and login using **Email or Username**
+- Password reset functionality
+- Role-based access control (User / Admin)
+- Protected routes for sensitive pages
+- Secure session handling with Firebase Authentication
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+### E-Commerce Functionality
+- Browse and view products
+- Advanced search and filtering
+- Shopping cart with quantity management
+- Favorites (wishlist) per user
+- Persistent cart & favorites per authenticated user
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+###  Admin Dashboard
+- Add, edit, and delete products
+- Manage user roles and permissions
+- Secure admin-only routes
+- Full protection using Firestore Security Rules
+
+---
+
+###  Notifications System
+- Personalized notifications for each user
+- Secure access (each user can access only their own notifications)
+- Real-time updates using Firestore listeners
+
+---
+
+##  AI-Powered Features
+
+###  Sales Analytics AI Model
+- AI model analyzes sales and user behavior data
+- Generates insights such as:
+  - Best-selling products
+  - Sales trends
+  - High-demand categories
+- Helps admins make **data-driven decisions**
+- Improves inventory planning and product prioritization
+
+###  Smart Recommendation Chatbot
+- AI-powered chatbot integrated into the platform
+- Recommends the **best products** based on:
+  - User preferences
+  - Previous interactions
+  - Product popularity
+- Enhances user experience and increases conversion rate
+
+---
+
+##  Tech Stack
+
+### Frontend
+- **React.js**
+- **Redux Toolkit** (state management)
+- **React Router**
+- **Vite**
+- Modular and scalable component architecture
+
+### Backend & Services
+- **Firebase Authentication**
+- **Firestore Database**
+- **Firebase Security Rules**
+- Real-time data handling with Firestore listeners
+
+### AI & Intelligence
+- AI Agent for sales data analysis
+- Recommendation engine for personalized product suggestions
+- AI chatbot for product guidance
+
+### Tools & Utilities
+- Axios
+- Environment Variables (.env)
+- Clean code & feature-based folder structure
+- Git & GitHub for version control
+
+---
+
+##  Security & Data Protection
+
+- Strong Firestore Security Rules
+- Users can only access their own data
+- Admin-only write access for sensitive collections
+- Protected API keys and environment variables
+- Secure authentication and authorization flow
+
+---
+
+
+
