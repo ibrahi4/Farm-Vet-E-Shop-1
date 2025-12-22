@@ -1,154 +1,310 @@
-import { useParams, Link } from "react-router-dom";
-import { useProduct } from "../hooks/useProduct";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useMemo, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { toggleFavourite } from "../features/favorites/favoritesSlice";
-
 import { addToCart } from "../features/cart/cartSlice";
-import { FiHeart, FiShoppingCart, FiArrowLeft } from "react-icons/fi";
-import React from "react";
+import { BsHeart, BsHeartFill, BsArrowLeft } from "react-icons/bs";
+import { FiCheckCircle, FiAlertTriangle, FiTag, FiBox } from "react-icons/fi";
+import { useProduct } from "../hooks/useProduct";
+import Footer from "../Authcomponents/Footer";
+import { ensureProductLocalization, getLocalizedProductTitle } from "../utils/productLocalization";
+
+const cleanDescription = (raw = "") => {
+  let text = raw || "";
+  text = text.replace(/!\[[^\]]*]\([^)]+\)/g, " ");
+  text = text.replace(/https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg)\S*/gi, " ");
+  text = text.replace(/https?:\/\/\S+/gi, " ");
+  text = text.replace(/\s+/g, " ").trim();
+  return text;
+};
+
+const pickLocalized = (product = {}, key, isAr) => {
+  const ar = product?.[`${key}Ar`];
+  const base = product?.[key];
+  if (isAr) return ar || base || "";
+  return base || ar || "";
+};
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { t, i18n } = useTranslation();
+  const isAr = (i18n.language || "en").startsWith("ar");
+  const isRTL = isAr;
 
-  const favorites = useSelector((state) => state.favorites);
-  const cart = useSelector((state) => state.cart.items);
+  const [activeTab, setActiveTab] = useState("description");
 
-  // ☑️ product.id ممكن يكون رقم — و id من params string
-  const numericId = Number(id);
+  const favorites = useSelector((state) => state.favorites?.items ?? []);
+  const cart = useSelector((state) => state.cart?.items ?? []);
 
-  // جلب بيانات المنتج
-  const { data: product, isLoading, isError, error } = useProduct(id);
+  const { data: product, isLoading, isError } = useProduct(id);
 
-  const isFavorite = favorites.some((f) => f.id === numericId);
-  const inCart = cart.some((c) => c.id === numericId);
+  const isFavorite = useMemo(
+    () => favorites.some((f) => String(f.id) === String(id)),
+    [favorites, id]
+  );
+  const inCart = useMemo(
+    () => cart.some((c) => String(c.id) === String(id)),
+    [cart, id]
+  );
 
-  const handleToggleFavorite = () => {
-    if (!product) return;
-    dispatch(toggleFavourite(product));
-  };
-
+  const handleToggleFavorite = () =>
+    product && dispatch(toggleFavourite(ensureProductLocalization(product)));
   const handleAddToCart = () => {
-    if (!product || inCart) return;
-    dispatch(addToCart(product));
+    if (!product || inCart || !isPurchasable) return;
+    dispatch(addToCart({ ...ensureProductLocalization(product), quantity: 1 }));
   };
 
-  if (isLoading) return <LoadingPlaceholder />;
-  if (isError) return <ErrorPlaceholder message={error?.message} />;
-  if (!product) return <ErrorPlaceholder message="Product not found." />;
+  const handleAskAi = () => {
+    if (!product) return;
+    const title = displayTitle || normalizedProduct.name || "";
+    const prompt = isAr
+      ? `أريد نصيحة حول المنتج: ${title}، مناسبته واستخدامه الآمن؟`
+      : `Advice about the product: ${title}, suitability and safe usage?`;
+    window.dispatchEvent(
+      new CustomEvent("chatbot:open", {
+        detail: { message: prompt },
+      })
+    );
+  };
 
-  return (
-    <div className="relative min-h-screen text-white px-4 py-12 sm:px-6 lg:px-8">
-      {/* Background */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+  const normalizedProduct = ensureProductLocalization(product || {});
+  const imageSrc =
+    normalizedProduct?.thumbnailUrl ||
+    normalizedProduct?.img ||
+    normalizedProduct?.image;
+  const displayTitle = getLocalizedProductTitle(
+    normalizedProduct,
+    i18n.language || "en"
+  );
+  const displayDescription = cleanDescription(
+    pickLocalized(normalizedProduct, "description", isAr) ||
+      normalizedProduct?.summary ||
+      ""
+  );
+  const skuValue =
+    normalizedProduct?.sku && normalizedProduct?.sku !== normalizedProduct?.id
+      ? normalizedProduct.sku
+      : null;
+  const displayCategory =
+    pickLocalized(normalizedProduct, "category", isAr) ||
+    normalizedProduct?.category ||
+    normalizedProduct?.categoryName;
+  const specs = [];
 
-      {/* Breadcrumb */}
-      <div className="mb-6">
-        <Link
-          to="/products"
-          className="inline-flex items-center gap-1 text-sm text-[#49BBBD] hover:underline"
-        >
-          <FiArrowLeft /> Back to Products
-        </Link>
+  /* Loading */
+  if (isLoading) {
+    return (
+      <div dir={isRTL ? "rtl" : "ltr"} className="min-h-screen flex items-center justify-center bg-[var(--bg-card)] dark:bg-[var(--bg-card)]">
+        <p className="text-gray-500 dark:text-gray-200 text-base">
+          {t("products.details.loading", "Loading product...")}
+        </p>
       </div>
+    );
+  }
 
-      {/* Product Card */}
-      <div className="mx-auto max-w-5xl rounded-2xl bg-white/5 backdrop-blur-md border border-white/20 shadow-xl overflow-hidden">
-        {/* Thumbnail */}
-        <div className="relative">
-          {product.thumbnailUrl ? (
-            <img
-              src={product.thumbnailUrl}
-              alt={product.title || product.name}
-              className="h-90 w-full object-cover"
-            />
-          ) : (
-            <div className="grid h-60 w-full place-items-center bg-white/5 text-xs text-white/50">
-              No Image
-            </div>
-          )}
-
-          {/* CTA Buttons */}
-          <div className="absolute bottom-4 right-4 flex flex-wrap gap-2">
-            <button
-              onClick={handleToggleFavorite}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold backdrop-blur-md border border-white/20 transition ${
-                isFavorite
-                  ? "bg-red-500 border-red-500 hover:bg-red-600"
-                  : "bg-white/10 hover:bg-white/20"
-              }`}
-            >
-              <FiHeart /> {isFavorite ? "Favorited" : "Add to Fav"}
-            </button>
-
-            <button
-              onClick={handleAddToCart}
-              disabled={inCart}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold backdrop-blur-md border border-white/20 transition ${
-                inCart
-                  ? "bg-gray-500 border-gray-500 cursor-not-allowed"
-                  : "bg-white/10 hover:bg-[#49BBBD]/20"
-              }`}
-            >
-              <FiShoppingCart /> {inCart ? "In Cart" : "Add to Cart"}
-            </button>
-          </div>
-        </div>
-
-        {/* Product Info */}
-        <div className="p-8 space-y-6">
-          <h1 className="text-3xl font-bold text-white">
-            {product.name || product.title}
+  /* Error */
+  if (isError || !product) {
+    return (
+      <div dir={isRTL ? "rtl" : "ltr"} className="min-h-screen bg-[var(--bg-card)] dark:bg-[var(--bg-card)] flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="text-7xl mb-4 text-emerald-500">😕</div>
+          <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+            {t("products.details.errorTitle", "Product not found")}
           </h1>
-
-          <p className="text-white/80">{product.description}</p>
-
-          <div className="flex flex-wrap items-center gap-4 text-sm">
-            <span className="rounded-full bg-[#49BBBD]/20 px-4 py-1 font-medium text-[#49BBBD]">
-              Price: {Number(product.price || 0).toLocaleString()}{" "}
-              {product.currency || "EGP"}
-            </span>
-
-            {product.category && (
-              <span className="rounded-full bg-white/10 px-4 py-1 text-white/80">
-                Category: {product.category}
-              </span>
+          <p className="text-gray-500 dark:text-gray-300 text-sm mb-4">
+            {t(
+              "products.details.errorMessage",
+              "We couldn't find this product. Try browsing the catalog."
             )}
-
-            {product.createdAt && (
-              <span className="text-white/60">
-                Added: {new Date(product.createdAt).toLocaleDateString()}
-              </span>
-            )}
-          </div>
-
-          {product.supplier && (
-            <div className="mt-4 border-t border-white/20 pt-4 text-sm text-white/80">
-              <p>
-                <strong>Supplier:</strong> {product.supplier}
-              </p>
-            </div>
-          )}
+          </p>
+          <button
+            onClick={() => navigate("/products")}
+            className="px-8 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
+          >
+            {t("products.details.backToProducts", "Back to products")}
+          </button>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-// Loading Skeleton
-function LoadingPlaceholder() {
-  return (
-    <div className="mx-auto max-w-3xl p-6 text-center text-white/70">
-      Loading product...
-    </div>
-  );
-}
+  const inStock = Number(product?.stock ?? product?.quantity ?? 0) > 0;
+  const isPurchasable = inStock && product?.isAvailable !== false;
+  const price =
+    product?.price != null
+      ? `${Number(product.price).toLocaleString()} ${t(
+        "products.details.currency",
+        "EGP"
+      )}`
+      : t("products.details.contactForPrice", "Contact for price");
+  const hasDescription = Boolean(displayDescription);
+  const hasSpecs = false;
+  const showTabs = hasDescription;
 
-// Error Placeholder
-function ErrorPlaceholder({ message }) {
   return (
-    <div className="mx-auto max-w-3xl p-6 text-center text-red-500">
-      {message}
+    <div dir={isRTL ? "rtl" : "ltr"} className="min-h-screen bg-[var(--bg-main)] dark:bg-[var(--bg-main)] pt-20 pb-14">
+      <div className="max-w-6xl mx-auto px-4">
+        {/* Product Card */}
+        <div className="bg-[var(--bg-card)] dark:bg-[var(--bg-card)] rounded-2xl shadow-sm border border-gray-200 dark:border-gray-200 overflow-hidden">
+          <div className="grid lg:grid-cols-2">
+            {/* Image */}
+            <div className="flex items-center justify-center bg-[var(--bg-main)] dark:bg-[var(--bg-main)] p-8">
+              {imageSrc ? (
+                <img
+                  src={imageSrc}
+                  alt={displayTitle}
+                  className="max-h-[460px] w-full object-contain rounded-xl shadow-sm"
+                />
+              ) : (
+                <div className="h-[320px] w-full grid place-items-center text-gray-400">
+                  {t("products.details.noImage", "No image available")}
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className="p-8 space-y-4 text-sm bg-[var(--bg-main)] dark:bg-[var(--bg-main)]">
+              {/* Title */}
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                {displayTitle}
+              </h1>
+
+              {/* Availability */}
+              <div className="flex items-center gap-2">
+                {isPurchasable ? (
+                  <span className="inline-flex items-center gap-2 text-xs font-medium bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">
+                    <FiCheckCircle /> {t("products.details.inStock", "In Stock")}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2 text-xs font-medium bg-amber-100 text-amber-700 px-3 py-1 rounded-full">
+                    <FiAlertTriangle />{" "}
+                    {t("products.details.outOfStock", "Out of Stock")}
+                  </span>
+                )}
+              </div>
+
+              {/* Price */}
+              <div className="pt-1">
+                <p className="text-gray-500 dark:text-gray-300 text-sm">
+                  {t("products.details.price", "Price")}
+                </p>
+                <p className="text-3xl font-bold text-emerald-600">{price}</p>
+              </div>
+
+              {/* Specs quick view */}
+              {/* Buttons */}
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={inCart || !isPurchasable}
+                  className={`flex-1 min-w-[180px] py-3 rounded-xl text-white text-sm font-semibold transition ${
+                    inCart || !isPurchasable
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-emerald-600 hover:bg-emerald-700"
+                  }`}
+                >
+                  {isPurchasable
+                    ? inCart
+                      ? t("products.details.inCart", "Already in cart")
+                      : t("products.details.addToCart", "Add to Cart")
+                    : t("products.details.outOfStock", "Out of Stock")}
+                </button>
+
+                <button
+                  onClick={handleToggleFavorite}
+                  className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl border text-sm font-semibold transition ${isFavorite
+                      ? "bg-red-500 text-white border-red-500"
+                      : "border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+                    }`}
+                >
+                  {isFavorite ? <BsHeartFill /> : <BsHeart />}
+                  {isFavorite
+                    ? t("products.details.removeFav", "Remove Favorite")
+                    : t("products.details.addFav", "Add to Favorites")}
+                </button>
+              </div>
+
+              {/* AI CTA */}
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 text-sm text-emerald-800 dark:text-emerald-100 px-4 py-3 rounded-xl flex items-center justify-between gap-3 mt-2">
+                <div className="flex-1">
+                  {t(
+                    "products.details.askAiCta",
+                    "Have a question about this product? Ask AI now"
+                  )}
+                </div>
+                <button
+                  onClick={handleAskAi}
+                  className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition"
+                >
+                  {t("products.details.askAiButton", "Ask AI")}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {showTabs && (
+          <div className="mt-6 bg-[var(--bg-card)] dark:bg-[var(--bg-card)] border border-gray-200 dark:border-gray-200 rounded-2xl shadow-sm p-4 text-sm">
+            <div className="flex flex-wrap gap-4 border-b border-gray-200 dark:border-gray-200 pb-3 text-black-600 dark:text-gray-600">
+              {[hasDescription && { key: "description", label: t("products.details.tabDescription", "Description") },
+              hasSpecs && { key: "specs", label: t("products.details.tabSpecs", "Specifications") }].filter(Boolean).map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`pb-2 ${activeTab === tab.key
+                      ? "text-emerald-600 font-semibold border-b-2 border-emerald-600"
+                      : ""
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="pt-4 text-gray-800 leading-relaxed min-h-[140px]">
+              {activeTab === "description" && hasDescription && (
+                <p>
+                  {displayDescription ||
+                    t(
+                      "products.details.noDescription",
+                      "No description available."
+                    )}
+                </p>
+              )}
+
+              {activeTab === "specs" && hasSpecs && (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {specs.length > 0 ? (
+                    specs.map((item) => (
+                      <div
+                        key={item.label}
+                        className="rounded-xl border border-gray-200 dark:border-white/10 px-3 py-2"
+                      >
+                        <p className="text-xs text-gray-500 dark:text-gray-300">
+                          {item.label}
+                        </p>
+                        <p className="font-semibold">{item.value}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {t(
+                        "products.details.noSpecs",
+                        "No specifications provided."
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <Footer />
     </div>
   );
 }

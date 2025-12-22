@@ -1,7 +1,17 @@
 import React from "react";
+import Footer from "../Authcomponents/Footer";
+import { useTranslation } from "react-i18next";
 
 function Orders() {
-  return <div>Orders</div>;
+  const { i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+
+  return (
+    <div dir={isRTL ? "rtl" : "ltr"}>
+      Orders
+      <Footer />
+    </div>
+  );
 }
 
 export default Orders;

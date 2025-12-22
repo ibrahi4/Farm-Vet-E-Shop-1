@@ -1,27 +1,373 @@
 @import "tailwindcss";
 
+/* =========================
+   Color Variables System
+   ========================= */
+:root {
+  /* Light Mode */
+  --bg-main: #ffffff;
+  --bg-card: #f5f7f8;
+  --bg-input: #ffffff;
+
+  --text-main: #111827; /* slate-900 for stronger contrast */
+  --text-muted: #334155; /* slate-700 for readable hints */
+  --text-placeholder: #94a3b8; /* slate-400/500 for lighter placeholder */
+
+  --border-color: #e3e3e3;
+
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}
+
+.dark {
+  /* Dark Mode */
+  --bg-main: #0b1217;
+  --bg-card: #111a20;
+  --bg-input: #f8fafc; /* keep inputs light for readability */
+
+  --text-main: #e2e8f0; /* slate-200 */
+  --text-muted: #cbd5e1; /* slate-300 */
+  --text-placeholder: #94a3b8; /* slate-400 for subtle placeholders */
+
+  --border-color: #1f2a33;
+
+  --success: #34d399;
+  --danger: #f87171;
+  --warning: #fbbf24;
+}
+
+/* Additional brand tokens for unified identity */
+:root {
+  --brand-primary: #0f766e; /* teal-600 */
+  --brand-accent: #0ea5e9; /* sky-500 */
+  --brand-secondary: #065f46; /* teal-800 */
+  --surface-header: #ffffff;
+  --surface-input: #ffffff;
+}
+
+.dark {
+  --brand-primary: #34d399; /* bright green */
+  --brand-accent: #60a5fa;
+  --brand-secondary: #0b5f4a;
+  --surface-header: rgba(17,44,37,0.7);
+  --surface-input: #f8fafc; /* light surface even in dark shell */
+}
+
+/* Header / shell surface (use across Home / Products / Articles / Account pages) */
+.header-surface {
+  background: var(--surface-header);
+  border: 1px solid var(--border-color);
+}
+
+/* Form input surface */
+.input-surface {
+  background: var(--surface-input);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+/* Brand helpers */
+.brand-primary { color: var(--brand-primary); }
+.brand-accent { color: var(--brand-accent); }
+.brand-bg { background: var(--brand-primary); color: white; }
+
+
+/* Global Transition */
 html {
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 body {
-  @theme {
-    --color-bg-light: #ffffff;
-    --color-text-light: #1a1a1a;
-    --color-bg-dark: #0d1b1b;
-    --color-text-dark: #e7f3eb;
-  }
-
-  background-color: var(--color-bg-light);
-  color: var(--color-text-light);
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-family: "Cairo", sans-serif;
 }
 
-.dark body {
-  background-color: var(--color-bg-dark);
-  color: var(--color-text-dark);
+/* Shared surface helpers */
+.bg-surface {
+    background: var(--bg-main);
+    color: var(--text-main);
 }
 
-.dark header {
-  background-color: #0b1818 !important;
-  color: #E9F9F7 !important;
+.bg-panel {
+
+    color: var(--text-main);
+}
+
+.card-surface {
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+
+.border-muted {
+  border-color: var(--border-color);
+}
+
+/* Icon Color Helpers */
+
+
+/* Grid Pattern for Hero Backgrounds */
+.bg-grid-pattern {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+.dark .bg-grid-pattern {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0);
+}
+
+/* Ensure icon visibility with minimum stroke width */
+svg {
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Override for very thin icons if needed */
+svg.icon-thin {
+  stroke-width: 1.5;
+}
+
+
+
+/* =========================
+   Settings Page Overrides
+   ========================= */
+
+.settings-shell {
+  color: var(--text-main);
+}
+
+.settings-shell p,
+.settings-shell span,
+.settings-shell li,
+.settings-shell label {
+  color: var(--text-muted);
+}
+
+
+select,
+textarea {
+  background: var(--surface-input);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+
+label,
+.form-label {
+  color: var(--text-main) !important;
+  font-weight: 700;
+  opacity: 1 !important;
+}
+
+.form-hint,
+.field-hint {
+  color: var(--text-muted);
+}
+
+legend,
+.form-section-title,
+.field-label {
+  color: var(--text-main) !important;
+  font-weight: 700;
+  opacity: 1 !important;
+}
+
+/* Force nested label spans (common in form wrappers) to inherit strong color */
+label span {
+  color: var(--text-main) !important;
+  opacity: 1 !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* Cards / Panels */
+.settings-shell .card,
+.settings-shell .panel,
+.settings-shell .section-box {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+/* Buttons */
+.settings-shell .btn-primary {
+  background: var(--success);
+  color: white;
+}
+
+.settings-shell .btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.settings-shell .btn-outline {
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+/* Alerts */
+.settings-shell .alert-danger {
+  background: rgba(239, 68, 68, 0.15);
+  border-left: 4px solid var(--danger);
+  color: var(--danger);
+}
+
+/* =========================
+    RTL Support
+    ========================= */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .form-input {
+  text-align: right;
+}
+
+/* RTL Utility Classes */
+[dir="rtl"] .rtl-flex-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .rtl-flex-row-reverse {
+  flex-direction: row;
+}
+
+[dir="rtl"] .rtl-text-left {
+  text-align: left;
+}
+
+[dir="rtl"] .rtl-text-right {
+  text-align: right;
+}
+
+[dir="rtl"] .rtl-justify-start {
+  justify-content: flex-end;
+}
+
+[dir="rtl"] .rtl-justify-end {
+  justify-content: flex-start;
+}
+
+[dir="rtl"] .rtl-items-start {
+  align-items: flex-end;
+}
+
+[dir="rtl"] .rtl-items-end {
+  align-items: flex-start;
+}
+
+[dir="rtl"] .rtl-ml-auto {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+[dir="rtl"] .rtl-mr-auto {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+[dir="rtl"] .rtl-pl-3 {
+  padding-left: 0.75rem;
+  padding-right: 0;
+}
+
+[dir="rtl"] .rtl-pr-3 {
+  padding-right: 0.75rem;
+  padding-left: 0;
+}
+
+[dir="rtl"] .rtl-left-1 {
+  left: auto;
+  right: 0.25rem;
+}
+
+[dir="rtl"] .rtl-right-1 {
+  right: auto;
+  left: 0.25rem;
+}
+
+[dir="rtl"] .rtl-left-0 {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .rtl-right-0 {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .rtl-left-3 {
+  left: auto;
+  right: 0.75rem;
+}
+
+[dir="rtl"] .rtl-right-3 {
+  right: auto;
+  left: 0.75rem;
+}
+
+[dir="rtl"] .rtl-left-4 {
+  left: auto;
+  right: 1rem;
+}
+
+[dir="rtl"] .rtl-right-4 {
+  right: auto;
+  left: 1rem;
+}
+
+/* Icon flipping for RTL */
+[dir="rtl"] .rtl-flip-icon {
+  transform: scaleX(-1);
+}
+
+/* Specific component RTL fixes */
+[dir="rtl"] .navbar-nav {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .input-icon {
+  order: 1;
+}
+
+[dir="rtl"] .input-field {
+  order: 2;
+}
+
+[dir="rtl"] .modal-close {
+  left: 1rem;
+  right: auto;
+}
+
+[dir="rtl"] .modal-footer {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .kpi-icon {
+  order: 2;
+}
+
+[dir="rtl"] .kpi-text {
+  order: 1;
+  text-align: right;
+}
+
+[dir="rtl"] .card-actions {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .badge-notification {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .dropdown-menu {
+  left: auto;
+  right: 0;
 }

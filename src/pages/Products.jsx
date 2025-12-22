@@ -1,20 +1,13 @@
-// src/pages/Products.jsx
-import React, { useState, useMemo } from "react";
-import {
-  FiSearch,
-  FiArrowUp,
-  FiArrowDown,
-  FiHeart,
-  FiShoppingCart,
-  FiTag,
-} from "react-icons/fi";
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+﻿// src/pages/Products.jsx
+import React, { useState, useMemo, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { BsArrowUp, BsArrowDown } from "react-icons/bs";
+import Footer from "../Authcomponents/Footer";
+import { UseTheme } from "../theme/ThemeProvider";
 import { useProductsSorted } from "../hooks/useProductsSorted";
-import { usePagination } from "../hooks/usePagination";
-import Pager from "../admin/Pager";
-import { toggleFavourite } from "../features/favorites/favoritesSlice";
-import { addToCart } from "../features/cart/cartSlice";
+import { useCategoriesSorted } from "../hooks/useCategoriesSorted";
+import ProductCard from "../components/cards/ProductCard";
 
 const SORT_FIELDS = [
   { value: "createdAt", label: "Newest" },
@@ -23,16 +16,28 @@ const SORT_FIELDS = [
 ];
 
 export default function Products() {
+  const { categoryId } = useParams();
   const [q, setQ] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
   const [dir, setDir] = useState("desc");
-  const [pageSize, setPageSize] = useState(6);
+  const [categoryFilter, setCategoryFilter] = useState(categoryId || "all");
 
-  const dispatch = useDispatch();
+  const { theme } = UseTheme();
+  const isDark = theme === "dark";
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
   const navigate = useNavigate();
 
-  const favorites = useSelector((state) => state.favorites);
-  const cart = useSelector((state) => state.cart.items);
+  // PAGINATION
+  const ITEMS_PER_PAGE = 6;
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setCategoryFilter(categoryId || "all");
+    setPage(1);
+  }, [categoryId]);
+
+  const { data: categories = [] } = useCategoriesSorted({ dir: "asc" });
 
   const {
     data: all = [],
@@ -41,208 +46,186 @@ export default function Products() {
     error,
   } = useProductsSorted({ sortBy, dir, qText: q });
 
-  const list = useMemo(() => all, [all]);
+  // FILTERING + SEARCH
+  const filteredList = useMemo(() => {
+    let list = all;
 
-  const {
-    paginatedData,
-    currentPage,
-    totalPages,
-    setPage,
-    nextPage,
-    prevPage,
-    rangeStart,
-    rangeEnd,
-    totalItems,
-  } = usePagination(list, pageSize);
+    if (categoryFilter !== "all") {
+      list = list.filter((p) => p.categoryId === categoryFilter);
+    }
 
-  const handleToggleFavorite = (product) => {
-    dispatch(toggleFavourite(product));
-  };
+    if (q.trim()) {
+      list = list.filter((p) =>
+        (p.name || p.title || "")
+          .toLowerCase()
+          .includes(q.toLowerCase())
+      );
+    }
 
-  const handleAddToCart = (product) => {
-    dispatch(addToCart(product)); // بيزوّد quantity لو المنتج متكرر
-  };
+    return list;
+  }, [all, q, categoryFilter]);
 
-  const handleCardClick = (productId) => {
-    navigate(`/products/${productId}`);
-  };
+  // PAGINATION
+  const totalPages = Math.max(1, Math.ceil(filteredList.length / ITEMS_PER_PAGE));
+  const paginatedProducts = filteredList.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  );
 
   return (
-    <div className="relative text-white min-h-screen font-inter">
-      <div className="absolute inset-0 bg-[#658a8a] via-[#2a4435] to-[#214939]" />
+    <div
+      dir={isRTL ? "rtl" : "ltr"}
+      className={`
+        min-h-screen flex flex-col
+        ${isDark ? "bg-[#0c1614] text-white" : "bg-gray-50 text-slate-900"}
+      `}
+    >
+      {/* ===== PAGE WRAPPER ===== */}
+      <div className="flex-1 mx-auto max-w-7xl w-full px-4 md:px-0 pb-20 pt-10">
 
-      <div className="mx-auto w-full max-w-7xl px-4 py-10 relative z-10">
-        {/* Header */}
-        <header className="mb-8 rounded-2xl border border-white/30 bg-white/5 p-6 shadow-2xl backdrop-blur-lg">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <h1 className="text-3xl font-bold tracking-tight text-[#d7f7d0] flex items-center gap-2">
-              <FiTag className="text-[#9af59d]" /> Products
+        {/* ===== HEADER CARD ===== */}
+        <div
+          className={`
+            rounded-2xl shadow-xl border mb-10
+            ${isDark 
+              ? "bg-[#0f1a1a]/80 border-white/10 backdrop-blur-xl" 
+              : "bg-white border-gray-200"
+            }
+          `}
+        >
+          <div className="px-6 py-6 border-b border-white/10">
+            <h1
+              className={`
+                text-4xl md:text-5xl font-extrabold bg-clip-text text-transparent
+                ${isDark
+                  ? "bg-gradient-to-r from-teal-300 via-emerald-300 to-lime-300"
+                  : "bg-gradient-to-r from-emerald-600 via-green-500 to-teal-500"
+                }
+              `}
+            >
+              {t("products.title", "Products")}
             </h1>
+          </div>
 
-            {/* Filters */}
-            <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search products..."
-                  className="w-full rounded-xl border border-white/20 bg-[#203232]/50 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-gray-400"
-                />
-              </div>
+          {/* ===== FILTERS ===== */}
+          <div className="px-6 py-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+
+            {/* Search */}
+            <input
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPage(1);
+              }}
+              placeholder={t("products.search", "Search products...")}
+              className={`
+                md:col-span-2 w-full rounded-lg px-4 py-3 text-sm shadow-sm
+                ${isDark
+                  ? "bg-white/10 border-white/20 text-white placeholder-white/60"
+                  : "bg-white border border-gray-200"}
+              `}
+            />
+
+            {/* Category */}
+            <select
+              value={categoryFilter}
+              onChange={(e) => {
+                setCategoryFilter(e.target.value);
+                setPage(1);
+              }}
+              className={`
+                rounded-lg px-3 py-3 text-sm shadow-sm
+                ${isDark
+                  ? "bg-white/10 border-white/20 text-white"
+                  : "bg-white border border-gray-200"}
+              `}
+            >
+              <option value="all">{t("products.allCategories")}</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+
+            {/* Sort */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setDir((prev) => (prev === "asc" ? "desc" : "asc"))}
+                className={`
+                  px-3 py-3 rounded-lg shadow-sm
+                  ${isDark
+                    ? "bg-white/10 border-white/20 text-white"
+                    : "bg-white border border-gray-200"}
+                `}
+              >
+                {dir === "asc" ? <BsArrowUp /> : <BsArrowDown />}
+              </button>
 
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full rounded-xl border border-white/20 bg-[#203232]/50 px-3 py-2.5 text-sm text-white"
+                className={`
+                  rounded-lg px-3 py-3 text-sm shadow-sm
+                  ${isDark
+                    ? "bg-white/10 border-white/20 text-white"
+                    : "bg-white border border-gray-200"}
+                `}
               >
                 {SORT_FIELDS.map((s) => (
-                  <option key={s.value} value={s.value} className="text-black">
-                    Sort: {s.label}
+                  <option key={s.value} value={s.value}>
+                    {s.label}
                   </option>
                 ))}
               </select>
+            </div>
+          </div>
+        </div>
 
+        {/* ===== PRODUCT GRID ===== */}
+        <div className="mt-4">
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {paginatedProducts.map((p, index) => (
+              <li key={p.id}>
+                <ProductCard product={p} index={index} />
+              </li>
+            ))}
+          </ul>
+
+          {/* ===== PAGINATION ===== */}
+          {filteredList.length > 0 && (
+            <div className="flex items-center justify-center gap-4 mt-10">
               <button
-                onClick={() => setDir((d) => (d === "asc" ? "desc" : "asc"))}
-                className="w-full rounded-xl border border-white/20 bg-[#203232]/50 px-3 py-2.5 text-sm text-white flex items-center justify-center gap-2"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="px-5 py-2 rounded-xl bg-emerald-600 text-white disabled:bg-emerald-600/40"
               >
-                {dir === "asc" ? <FiArrowUp /> : <FiArrowDown />}
-                <span>{dir === "asc" ? "Ascending" : "Descending"}</span>
+                {t("pagination.prev")}
               </button>
 
-              <select
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-                className="w-full rounded-xl border border-white/20 bg-[#203232]/50 px-3 py-2.5 text-sm text-white"
+              <span
+                className={`
+                  px-4 py-2 rounded-xl border
+                  ${isDark ? "bg-slate-800 border-slate-700" : "bg-white border-gray-200"}
+                `}
               >
-                {[4, 8, 12, 24].map((n) => (
-                  <option key={n} value={n} className="text-black">
-                    {n} / page
-                  </option>
-                ))}
-              </select>
+                {page} / {totalPages}
+              </span>
+
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                className="px-5 py-2 rounded-xl bg-emerald-600 text-white disabled:bg-emerald-600/40"
+              >
+                {t("pagination.next")}
+              </button>
             </div>
-          </div>
-        </header>
-
-        {/* States */}
-        {isLoading && <GridSkeleton count={pageSize} />}
-        {isError && (
-          <div className="rounded-lg border border-red-500 bg-red-900/50 p-4 text-red-300">
-            Failed to load products. {error?.message}
-          </div>
-        )}
-        {!isLoading && !isError && list.length === 0 && (
-          <div className="rounded-lg border border-white/20 bg-white/10 p-8 text-center text-white/70">
-            No products found.
-          </div>
-        )}
-
-        {/* Product Grid */}
-        {!isLoading && !isError && list.length > 0 && (
-          <>
-            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {paginatedData.map((p) => {
-                const isFavorite = favorites.some((f) => f.id === p.id);
-
-                return (
-                  <li
-                    key={p.id}
-                    className="group cursor-pointer overflow-hidden rounded-2xl bg-[#244036]/20 border border-[#9af59d]/10 shadow-lg hover:shadow-[#9af59d]/30 transition"
-                    onClick={() => handleCardClick(p.id)}
-                  >
-                    {p.thumbnailUrl ? (
-                      <img
-                        src={p.thumbnailUrl}
-                        alt={p.title}
-                        className="h-90 w-full object-cover group-hover:scale-105 transition-transform"
-                      />
-                    ) : (
-                      <div className="grid h-60 w-full place-items-center bg-white/5 text-xs text-white/50">
-                        No Image
-                      </div>
-                    )}
-
-                    <div className="p-5 flex flex-col justify-between min-h-[180px]">
-                      <div>
-                        <h3 className="line-clamp-1 text-lg font-semibold text-[#e6ffe2]">
-                          {p.title}
-                        </h3>
-                        <p className="mt-2 line-clamp-1 text-sm text-[#9af59d]">
-                          {p.category}
-                        </p>
-                      </div>
-
-                      <div className="mt-3 flex items-center justify-between">
-                        <span className="text-base font-medium text-[#f5fff3]">
-                          {Number(p.price || 0).toLocaleString()}{" "}
-                          <span className="text-[#9af59d]/70">EGP</span>
-                        </span>
-                      </div>
-
-                      {/* Buttons */}
-                      <div className="mt-4 flex items-center gap-3">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleFavorite(p);
-                          }}
-                          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#9af59d]/20 bg-white/5 text-white hover:text-red-500"
-                        >
-                          <FiHeart
-                            size={20}
-                            className={isFavorite ? "text-red-500" : ""}
-                          />
-                        </button>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddToCart(p);
-                          }}
-                          className="flex-1 h-10 rounded-xl border border-[#9af59d]/20 bg-[#203232]/60 px-4 text-sm font-semibold text-white hover:bg-[#9af59d]/20"
-                        >
-                          <div className="flex items-center justify-center gap-2">
-                            <FiShoppingCart size={18} />
-                            Add to Cart
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <div className="mt-8">
-              <Pager
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPrev={prevPage}
-                onNext={nextPage}
-                onGo={setPage}
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                totalItems={totalItems}
-              />
-            </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
-    </div>
-  );
-}
 
-function GridSkeleton({ count = 6 }) {
-  return (
-    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: count }).map((_, i) => (
-        <li
-          key={i}
-          className="h-72 animate-pulse rounded-xl bg-[#244036]/40 backdrop-blur"
-        />
-      ))}
-    </ul>
+      {/* ===== FOOTER ===== */}
+      <Footer />
+    </div>
   );
 }

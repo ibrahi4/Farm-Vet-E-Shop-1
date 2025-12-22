@@ -1,254 +1,575 @@
-import { NavLink } from "react-router-dom";
+// src/pages/admin/AdminDashboard.jsx
+import { useState, useEffect, useMemo } from "react";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "../../services/firebase";
+import { analyzeWithGemini } from "../../utils/gemini";
 import {
-  FiShoppingBag,
-  FiTag,
-  FiCheckCircle,
-  FiClock,
-  FiUsers,
-} from "react-icons/fi";
-import PageHeader from "../../admin/PageHeader";
-import {
-  useProductsCount,
-  useProductsAvailableCount,
-  useCategoriesCount,
-  useUsersCount,
-  useUsersStats,
-} from "../../hooks/useCounts";
-import { useProductsSorted } from "../../hooks/useProductsSorted";
-
-import {
-  ResponsiveContainer,
-  ComposedChart,
+  LineChart,
+  Line,
+  BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
+  ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
+  Legend,
 } from "recharts";
+import {
+  Package,
+  ShoppingCart,
+  Users,
+  DollarSign,
+  RefreshCw,
+  Sparkles,
+  Repeat,
+  TrendingUp,
+  PackageX,
+  AlertTriangle,
+} from "lucide-react";
+import { format } from "date-fns";
+import { UseTheme } from "../../theme/ThemeProvider";
 
 export default function AdminDashboard() {
-  // 🧮 إحصائيات عامة
-  const { data: totalProducts = 0 } = useProductsCount();
-  const { data: availableProducts = 0 } = useProductsAvailableCount();
-  const { data: totalCategories = 0 } = useCategoriesCount();
-  const { data: totalUsers = 0 } = useUsersCount();
-  const outOfStock = Math.max(0, totalProducts - availableProducts);
+  const [loading, setLoading] = useState(true);
+  const [analysis, setAnalysis] = useState("Loading insights...");
+  const [products, setProducts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [userNameMap, setUserNameMap] = useState({});
+  const [emailMap, setEmailMap] = useState({});
+  const [phoneMap, setPhoneMap] = useState({});
+  const [usernameMap, setUsernameMap] = useState({});
+  const { theme } = UseTheme();
+  const isDark = theme === "dark";
 
-  // 📊 بيانات المستخدمين اليومية والشهرية والسنوية
-  const { data: usersStats = [] } = useUsersStats();
+  const stats = useMemo(() => {
+    const totalProducts = products.length;
+    const availableProducts = products.filter((p) => (p.stock || 0) > 0).length;
+    const outOfStock = totalProducts - availableProducts;
+    const lowStockCount = products.filter(
+      (p) => (p.stock || 0) > 0 && (p.stock || 0) <= 5
+    ).length;
+    const totalUsers = users.length;
+    const totalOrders = orders.length;
+    const totalSales = orders.reduce((sum, o) => sum + (o.totalValue || 0), 0);
+    const avgOrderValue =
+      totalOrders > 0 ? Math.round(totalSales / totalOrders) : 0;
 
-  // 🔢 بيانات المخطط الدائري للمنتجات
-  const productData = [
-    { name: "Available", value: availableProducts },
-    { name: "Out of Stock", value: outOfStock },
-  ];
-  const PRODUCT_COLORS = ["#1ABC9C", "#E74C3C"];
+    const customerMap = {};
+    orders.forEach((o) => {
+      const uid =
+        o.uid ||
+        o.userId ||
+        o.username ||
+        o.userName ||
+        o.phone ||
+        o.email ||
+        "unknown_" + o.id;
+      if (!customerMap[uid]) customerMap[uid] = { orders: 0, revenue: 0 };
+      customerMap[uid].orders += 1;
+      customerMap[uid].revenue += o.totalValue || 0;
+    });
+    const repeatCustomers = Object.values(customerMap).filter(
+      (c) => c.orders > 1
+    );
+    const repeatRate =
+      Object.keys(customerMap).length > 0
+        ? (
+            (repeatCustomers.length / Object.keys(customerMap).length) *
+            100
+          ).toFixed(1)
+        : "0";
+    const totalCustomers = Object.keys(customerMap).length;
+    const repeatCount = repeatCustomers.length;
 
-  // 🆕 أحدث المنتجات
-  const { data: recent = [], isLoading: loadingRecent } = useProductsSorted({
-    sortBy: "createdAt",
-    dir: "desc",
-    qText: "",
-    status: "all",
-  });
-  const recent3 = (recent || []).slice(0, 3); // ثلاث منتجات فقط في الصف
+    return {
+      totalProducts,
+      availableProducts,
+      outOfStock,
+      lowStockCount,
+      totalUsers,
+      totalOrders,
+      totalSales,
+      avgOrderValue,
+      repeatRate,
+      customerMap,
+      totalCustomers,
+      repeatCount,
+    };
+  }, [products, users, orders]);
+
+  const charts = useMemo(() => {
+    const dailySalesMap = {};
+    orders.forEach((o) => {
+      const dateKey = format(o.createdAt || new Date(), "dd/MM");
+      dailySalesMap[dateKey] =
+        (dailySalesMap[dateKey] || 0) + (o.totalValue || 0);
+    });
+    const dailySales = Object.keys(dailySalesMap)
+      .map((date) => ({ date, amount: dailySalesMap[date] }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    const productSalesMap = {};
+    orders.forEach((order) => {
+      (order.items || []).forEach((item) => {
+        const name = item.name || item.productName || "Unnamed product";
+        const revenue = (item.price || 0) * (item.quantity || 1);
+        productSalesMap[name] = (productSalesMap[name] || 0) + revenue;
+      });
+    });
+    const productSales = Object.entries(productSalesMap)
+      .map(([name, amount]) => ({ name, amount }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 8);
+
+    const topCustomers = Object.entries(stats.customerMap)
+      .map(([uid, info]) => ({
+        customer:
+          userNameMap[uid] ||
+          usernameMap[uid] ||
+          phoneMap[uid] ||
+          emailMap[uid] ||
+          "Customer",
+        revenue: info.revenue,
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 6);
+
+    const lowStockProducts = products.filter(
+      (p) => p.stock > 0 && p.stock <= 5
+    );
+
+    const pieData = [
+      { name: "Repeat Customers", value: stats.repeatCount },
+      {
+        name: "New Customers",
+        value: stats.totalCustomers - stats.repeatCount,
+      },
+    ];
+
+    return {
+      dailySales,
+      productSales,
+      topCustomers,
+      lowStockProducts,
+      pieData,
+    };
+  }, [stats, orders, products, userNameMap, emailMap, phoneMap, usernameMap]);
+
+  const fetchAllData = async () => {
+    setLoading(true);
+    try {
+      const usersRef = collection(db, "users");
+      const usersSnap = await getDocs(usersRef);
+      const [productsSnap, ordersSnap] = await Promise.all([
+        getDocs(
+          query(collection(db, "products"), orderBy("createdAt", "desc"))
+        ),
+        getDocs(query(collection(db, "orders"), orderBy("createdAt", "desc"))),
+      ]);
+
+      setProducts(
+        productsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+      );
+
+      const usersList = usersSnap.docs.map((doc) => {
+        const data = doc.data() || {};
+        return {
+          id: doc.id,
+          uid: data.uid || doc.id,
+          fullName:
+            data.fullName ||
+            data.name ||
+            data.username ||
+            data.userName ||
+            "Customer",
+          email: data.email || "unknown@email",
+          phone: data.phone || "unknown_phone",
+          username: data.username || data.userName || "unknown_username",
+        };
+      });
+      setUsers(usersList);
+
+      const nameMap = {};
+      usersList.forEach((u) => {
+        if (u.uid) nameMap[u.uid] = u.fullName;
+        nameMap[u.id] = u.fullName; // Add mapping for doc.id as well
+      });
+      setUserNameMap(nameMap);
+
+      const emailMapObj = Object.fromEntries(
+        usersList
+          .filter((u) => u.email && u.email !== "unknown@email")
+          .map((u) => [u.email, u.fullName])
+      );
+      setEmailMap(emailMapObj);
+
+      const phoneMapObj = Object.fromEntries(
+        usersList
+          .filter((u) => u.phone && u.phone !== "unknown_phone")
+          .map((u) => [u.phone, u.fullName])
+      );
+      setPhoneMap(phoneMapObj);
+
+      const usernameMapObj = Object.fromEntries(
+        usersList
+          .filter((u) => u.username && u.username !== "unknown_username")
+          .map((u) => [u.username, u.fullName])
+      );
+      setUsernameMap(usernameMapObj);
+
+      setOrders(
+        ordersSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          totalValue:
+            doc.data().total ||
+            doc.data().totals?.total ||
+            (doc.data().totals?.subtotal || 0) +
+              (doc.data().totals?.shipping || 0) ||
+            0,
+          createdAt: doc.data().createdAt?.toDate() || new Date(),
+        }))
+      );
+
+      const aiText = await analyzeWithGemini(
+        ordersSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+      );
+      setAnalysis(aiText);
+    } catch (err) {
+      console.error(err);
+      setAnalysis("Unable to load analysis right now.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
 
   return (
-    <>
-      <PageHeader title="Dashboard Overview" />
-
-      {/* 🔢 كروت الإحصائيات */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard
-          title="Total Products"
-          value={totalProducts}
-          icon={<FiShoppingBag className="text-[#34495E]" />}
-          link={{ to: "/admin/products", label: "Manage" }}
-        />
-        <StatCard
-          title="Available"
-          value={availableProducts}
-          icon={<FiCheckCircle className="text-[#1ABC9C]" />}
-          link={{ to: "/admin/products?filter=available", label: "View" }}
-        />
-        <StatCard
-          title="Out of Stock"
-          value={outOfStock}
-          icon={<FiClock className="text-[#E74C3C]" />}
-          link={{ to: "/admin/products?filter=outofstock", label: "Review" }}
-        />
-        <StatCard
-          title="Categories"
-          value={totalCategories}
-          icon={<FiTag className="text-[#9B59B6]" />}
-          link={{ to: "/admin/categories", label: "Manage" }}
-        />
-        <StatCard
-          title="Users"
-          value={totalUsers}
-          icon={<FiUsers className="text-[#F39C12]" />}
-          link={{ to: "/admin/users", label: "Manage" }}
-        />
-      </div>
-
-      {/* 📊 Products Pie Chart */}
-      <section className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-base font-semibold text-gray-900">
-          Products Distribution
-        </h2>
-        <ResponsiveContainer width="100%" height={250}>
-          <PieChart>
-            <Pie
-              data={productData}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              innerRadius={40}
-              paddingAngle={4}
-              label={({ name, percent }) =>
-                `${name}: ${(percent * 100).toFixed(0)}%`
-              }
-            >
-              {productData.map((entry, index) => (
-                <Cell key={index} fill={PRODUCT_COLORS[index]} />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
-      </section>
-
-      {/* 👥 Users Bar Chart with per Year */}
-      <section className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-base font-semibold text-gray-900">
-          User Growth Analytics
-        </h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <ComposedChart
-            data={usersStats}
-            margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+    <div
+      className={`min-h-screen ${
+        isDark
+          ? "bg-gradient-to-br from-slate-900 via-green-950 to-blue-950 text-white"
+          : "bg-white text-slate-900"
+      }`}
+    >
+      <div className="max-w-full mx-auto p-6 lg:p-10">
+        <div className="flex justify-between items-center mb-10">
+          <h1
+            className={`text-4xl lg:text-5xl font-bold ${
+              isDark
+                ? "bg-clip-text text-transparent bg-gradient-to-r from-green-400 via-blue-500 to-cyan-500"
+                : "text-emerald-700"
+            }`}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar
-              dataKey="daily"
-              fill="#3498DB"
-              name="Users / Day"
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="monthly"
-              fill="#F39C12"
-              name="Users / Month"
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="yearly"
-              fill="#9B59B6"
-              name="Users / Year"
-              radius={[4, 4, 0, 0]}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </section>
-
-      {/* 🆕 قسم أحدث المنتجات - كروت */}
-      <section className="mt-10">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">
-            Recent Products
-          </h2>
-          <NavLink
-            to="/admin/products"
-            className="text-sm font-medium text-[#2A9D8F] hover:underline"
+            Admin Dashboard
+          </h1>
+          <button
+            onClick={fetchAllData}
+            className={`flex items-center gap-3 px-6 py-3 rounded-xl shadow ${
+              isDark
+                ? "bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                : "bg-emerald-500 text-white hover:bg-emerald-600"
+            } transition`}
           >
-            See all →
-          </NavLink>
+            <RefreshCw className={loading ? "animate-spin" : ""} size={22} />{" "}
+            Refresh data
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {loadingRecent
-            ? Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-72 animate-pulse rounded-2xl bg-gray-50 shadow-sm"
-                />
-              ))
-            : recent3.map((p) => (
-                <div
-                  key={p.id}
-                  className="flex flex-col rounded-2xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition h-full"
-                >
-                  <img
-                    src={p.thumbnailUrl || "/placeholder.png"}
-                    alt={p.title || "Unnamed Product"}
-                    className="h-60 w-full rounded-lg object-cover border border-gray-200 mb-3"
-                  />
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold text-gray-900 truncate">
-                      {p.title || "Unnamed Product"}
+        {loading ? (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-2xl animate-pulse">Loading data...</div>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+              <KPICard
+                icon={Package}
+                label="Total products"
+                value={stats.totalProducts}
+                gradient="from-green-500 to-blue-500"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={ShoppingCart}
+                label="Total orders"
+                value={stats.totalOrders}
+                gradient="from-blue-500 to-indigo-600"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={DollarSign}
+                label="Total sales"
+                value={`${stats.totalSales.toLocaleString()} EGP`}
+                gradient="from-green-600 to-blue-700"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={Users}
+                label="Total users"
+                value={stats.totalUsers}
+                gradient="from-indigo-500 to-purple-600"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={TrendingUp}
+                label="Avg Order Value"
+                value={`${stats.avgOrderValue} EGP`}
+                gradient="from-teal-500 to-cyan-500"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={Repeat}
+                label="Repeat Rate"
+                value={`${stats.repeatRate}%`}
+                gradient="from-lime-500 to-green-500"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={PackageX}
+                label="Out of Stock"
+                value={stats.outOfStock}
+                gradient="from-red-500 to-pink-500"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={AlertTriangle}
+                label="Low Stock"
+                value={stats.lowStockCount}
+                gradient="from-yellow-500 to-orange-500"
+                isDark={isDark}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+              <ChartCard title="Daily sales trend" isDark={isDark}>
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={charts.dailySales}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={isDark ? "#334155" : "#e2e8f0"}
+                    />
+                    <XAxis
+                      dataKey="date"
+                      stroke={isDark ? "#94a3b8" : "#475569"}
+                    />
+                    <YAxis stroke={isDark ? "#94a3b8" : "#475569"} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: isDark ? "#1e293b" : "#ffffff",
+                        border: "none",
+                        borderRadius: "12px",
+                        color: isDark ? "#e2e8f0" : "#0f172a",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="amount"
+                      stroke="#3b82f6"
+                      strokeWidth={4}
+                      dot={{ fill: "#22c55e", r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Top products by revenue" isDark={isDark}>
+                <ResponsiveContainer width="100%" height={380}>
+                  <BarChart data={charts.productSales} layout="vertical">
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={isDark ? "#334155" : "#e2e8f0"}
+                    />
+                    <XAxis
+                      type="number"
+                      stroke={isDark ? "#94a3b8" : "#475569"}
+                    />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      stroke={isDark ? "#FFFFFF" : "#0f172a"}
+                      width={110}
+                    />
+                    <Tooltip />
+                    <Bar
+                      dataKey="amount"
+                      fill="#6366f1"
+                      radius={[0, 12, 12, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Top customers by revenue" isDark={isDark}>
+                <ResponsiveContainer width="100%" height={380}>
+                  <BarChart data={charts.topCustomers}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={isDark ? "#334155" : "#e2e8f0"}
+                    />
+                    <XAxis
+                      dataKey="customer"
+                      stroke={isDark ? "#F9FAF9" : "#0f172a"}
+                      angle={-15}
+                      textAnchor="end"
+                    />
+                    <YAxis stroke={isDark ? "#94a3b8" : "#475569"} />
+                    <Tooltip />
+                    <Bar
+                      dataKey="revenue"
+                      fill="#8b5cf6"
+                      radius={[12, 12, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Customer Types" isDark={isDark}>
+                <ResponsiveContainer width="100%" height={380}>
+                  <PieChart>
+                    <Pie
+                      data={charts.pieData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={150}
+                      label
+                    >
+                      {charts.pieData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={["#10b981", "#3b82f6"][index % 2]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <ChartCard title="Low stock products" isDark={isDark}>
+                <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
+                  {charts.lowStockProducts.map((p) => (
+                    <div
+                      key={p.id}
+                      className={`p-3 rounded-lg border ${
+                        isDark
+                          ? "bg-red-900/40 border-red-500 text-red-100"
+                          : "bg-red-50 border-red-200 text-red-800"
+                      }`}
+                    >
+                      <p className="text-sm font-semibold">{p.title}</p>
+                      <p className="text-xs">Stock: {p.stock}</p>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1 truncate">
-                      {p.category?.category || p.category || " "}
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {p.createdAt ? formatDate(p.createdAt) : "—"}
-                    </div>
-                  </div>
-                  <span
-                    className={`mt-2 inline-block rounded-full px-2 py-1 text-sm text-center ${
-                      p.isAvailable
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-amber-50 text-amber-700"
-                    }`}
-                  >
-                    {p.isAvailable ? "Available" : "Out of stock"}
-                  </span>
+                  ))}
+                  {charts.lowStockProducts.length === 0 && (
+                    <p className={isDark ? "text-gray-400" : "text-slate-500"}>
+                      No low-stock products right now.
+                    </p>
+                  )}
                 </div>
-              ))}
-        </div>
-      </section>
-    </>
-  );
-}
+              </ChartCard>
 
-// 📊 كارت الإحصائيات
-function StatCard({ title, value, icon, link }) {
-  return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow-md hover:scale-[1.02] duration-200 ease-in-out">
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-medium text-gray-600">{title}</div>
-        <div className="text-2xl">{icon}</div>
+              <div
+                className={`col-span-2 rounded-3xl p-8 shadow-2xl border ${
+                  isDark
+                    ? "bg-gradient-to-br from-green-900/50 to-blue-900/50 backdrop-blur-xl border-green-500/30"
+                    : "bg-white border-slate-200"
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <Sparkles
+                    className={isDark ? "text-yellow-400" : "text-amber-500"}
+                    size={32}
+                  />
+                  <h2 className="text-2xl font-bold">
+                    AI insights on recent orders
+                  </h2>
+                </div>
+                <div
+                  className={`text-sm leading-relaxed max-h-96 overflow-y-auto ${
+                    isDark
+                      ? "text-gray-200 prose prose-invert"
+                      : "text-slate-700"
+                  }`}
+                >
+                  {analysis}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
-      <div className="mt-1 text-3xl font-bold text-gray-900">{value}</div>
-      {link && (
-        <NavLink
-          to={link.to}
-          className="mt-3 inline-block text-sm font-semibold text-[#2A9D8F] hover:text-[#34495E]"
-        >
-          {link.label} →
-        </NavLink>
-      )}
     </div>
   );
 }
 
-// 📅 تنسيق التاريخ
-function formatDate(ts) {
-  if (!ts) return "—";
-  const ms = ts.toMillis
-    ? ts.toMillis()
-    : ts.seconds
-    ? ts.seconds * 1000
-    : +new Date(ts);
-  return new Date(ms).toLocaleDateString();
+function KPICard({ icon: Icon, label, value, gradient, isDark }) {
+  return (
+    <div
+      className={`p-6 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 ${
+        isDark
+          ? `bg-gradient-to-br ${gradient}`
+          : "bg-white border border-slate-200"
+      }`}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <p
+          className={
+            isDark ? "text-white/80 text-sm" : "text-slate-500 text-sm"
+          }
+        >
+          {label}
+        </p>
+        <Icon
+          size={36}
+          className={isDark ? "opacity-80 text-white" : "text-emerald-500"}
+        />
+      </div>
+      <p
+        className={
+          isDark
+            ? "text-3xl font-bold text-white"
+            : "text-3xl font-bold text-slate-900"
+        }
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function ChartCard({ title, children, isDark }) {
+  return (
+    <div
+      className={`p-8 rounded-3xl ${
+        isDark
+          ? "bg-slate-900/70 backdrop-blur-xl border border-green-500/20 shadow-2xl"
+          : "bg-white border border-slate-200 shadow-md"
+      }`}
+    >
+      <h2
+        className={`text-2xl font-bold mb-6 text-center ${
+          isDark
+            ? "bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500"
+            : "text-slate-800"
+        }`}
+      >
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
 }

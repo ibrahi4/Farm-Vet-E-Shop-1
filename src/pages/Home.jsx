@@ -1,82 +1,154 @@
-import Navbar from '../components/layout/Navbar';
-import Hero from './homeCom/hero';
-import CategoriesSection from './homeCom/CategoriesSection';
-import Articles from './homeCom/Articles';
-import AiAssistant from './homeCom/AiAssistant';
-import EcoBanner from './homeCom/EcoBanner';
-import Footer from '../components/layout/footer';
-import FeaturedProducts from './homeCom/FeaturedProducts';
-
-// 👇 أهم تعديل هنا
+// src/pages/Home.jsx
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import Hero from "./homeCom/hero";
+import CategoriesSection from "./homeCom/CategoriesSection";
+import Articles from "./homeCom/Articles";
+import EcoBanner from "./homeCom/EcoBanner";
+import Footer from "../Authcomponents/Footer";
+import FeaturedProducts from "./homeCom/FeaturedProducts";
 import { useCategoriesSorted } from "../hooks/useCategoriesSorted";
+import { localizeArticleRecord } from "../data/articles";
+import useArticles from "../hooks/useArticles";
+import { useTranslation } from "react-i18next";
+import { useCategoryRepresentativeImages } from "../hooks/useCategoryRepresentativeImages";
+import { UseTheme } from "../theme/ThemeProvider";
 
 export default function Home() {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const isRTL = i18n.language === "ar";
+  const { theme } = UseTheme();
+  const isDark = theme === "dark";
 
-  // ⭐ Load real categories from Firestore
   const { data: catData = [] } = useCategoriesSorted({ dir: "desc" });
+  const { articles: allFeaturedArticles } = useArticles({ featureHome: true });
 
-  // ⭐ Normalize categories for CategoryCard
-  const categories = catData.map((c) => ({
-  id: c.id,
-  title: c.name || "Category",
-  note: c.note || "Browse products",
-  img: c.img || "https://dummyimage.com/300x300/eeeeee/000000&text=No+Image",
-}));
+  const featuredArticles = allFeaturedArticles.filter(
+    (a) => a.status === "published"
+  );
 
+  const locale = i18n.language || "en";
+  const localizedFeatured = featuredArticles.map((article) =>
+    localizeArticleRecord(article, locale)
+  );
 
-  const articles = [
-    {
-      title: '5 Ways to Improve Your Soil Health',
-      excerpt: 'Learn the fundamentals of creating a nutrient-rich foundation for your crops...',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCA28tLs0B_xksW-t6klMrtYJVc7ZaRbAXHPmvDSPptVHn6CtJGFD9GWBm0lTrETF3Sgeboe0zI5MvjCNo4LcUIuZDwD4SuEgskn17hpOaQTovd1vK80ETDve4qRSvYE25-4RMVxd7ek_p5v0sCnH2i4plL7bg7HicQQeqwc9S7ma0eaL1vYX6uXSP9YRUzNt3DKm0oxyj_MsqRla_47YpNqjlpCWlZB9teW23yR5JuxodOzFKrFhhGlKefUs7m2WyJ4UFQB3Vs2tk',
-    },
-    {
-      title: 'Seasonal Guide: Spring Planting Tips',
-      excerpt: 'Maximize your spring harvest with these essential tips for planting and care...',
-      img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCTHTi5UQSR233xsMibUMPYHC6DgJsQXf-kfIf6BiJZN_I8-8tXzq_jnB8jUAv93zLvBKkFEJP9Lv56bcy2gDWD6lXNSG5rQVHEB9Z_gaeZAdESzgF1IEaqhnxTTrltX2s_v-j5k5VF8CRQVmGfFbwJnuCTDtf6tUZ--UBgfl3We9jxv8Ej30b92vcIs2id2sBGxoGscYLMCAa8Wcx7VsdCTeVrA981kuqx2FbwaNPbpRobhwXBAZYGn9kVsTxbMrZ7pkNolaifXeY',
-    },
-  ];
+  const categoryIds = useMemo(
+    () => catData.map((c) => c.id).filter(Boolean),
+    [catData]
+  );
+
+  const { data: categoryImages = {} } =
+    useCategoryRepresentativeImages(categoryIds);
+
+  const categories = catData.map((category) => ({
+    id: category.id,
+    title: category.name || t("home.categoryFallback"),
+    note: category.note || t("home.categoryNoteFallback"),
+    imageSources: [
+      ...(categoryImages[category.id] || []),
+      ...(category.img ? [category.img] : []),
+    ],
+    onClick: () => navigate(`/category/${category.id}`),
+  }));
+
+  const articles = localizedFeatured.map((article) => ({
+    title: article.title,
+    excerpt: article.summary,
+    img:
+      article.heroImage ||
+      `https://dummyimage.com/400x300/0f172a/ffffff&text=${t(
+        "home.articleFallback"
+      )}`,
+  }));
 
   return (
-    <main className="flex flex-col gap-12 md:gap-16 lg:gap-20">
-
-      {/* Hero */}
-      <div className="animate-fade-in">
-        <Hero
-          title="Smarter Farming Starts Here"
-          subtitle="Your one-stop shop for quality products, expert resources, and AI-powered farming advice."
-          bg="https://lh3.googleusercontent.com/aida-public/AB6AXuCLKxwiP-sEyN6Rrsaj0ZEikJ7tuC3i1BDZESOUybBIq9rxpKdpWBwAoodTCjWNVaMQAejA6E7MlL9jyLRyPeR6ToPxQIN0NEaK7VTyapj1liAE8OnwYii_WMHM3_uP3RbX2z_pu5eAGPqFtdI5dqUSJ0PpZeythsCjaDCt4GBFD3TOMNChq8rIrDZFZP9o0Js4D9lI2JIHBb9ZpWutDdH1xIDLxpTzpO-XReYaYDNn3sHTvGei5avHD43XCPbZ9MnexMNeNlcVztk"
+    <main
+      dir={isRTL ? "rtl" : "ltr"}
+      className={`
+        min-h-screen flex flex-col transition-colors duration-500
+        ${
+          isDark
+            ? "bg-[#02130f] bg-gradient-to-b from-[#02130f] via-[#022519] to-[#033624] text-slate-100"
+            : "bg-white text-slate-900"
+        }
+      `}
+    >
+      {/* ===================== HERO VIDEO SECTION ===================== */}
+      <section className="relative w-full overflow-hidden h-[450px] md:h-[520px] lg:h-[580px]">
+        {/* VIDEO BG */}
+        <video
+          src="/VideoProject.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         />
-      </div>
 
-      {/* Categories */}
-      <div className="bg-gradient-to-b from-transparent to-gray-50/50 dark:to-gray-800/50 py-12">
-        <div className="container mx-auto">
-          <CategoriesSection header="Shop by Category" items={categories} />
+        {/* THEMED OVERLAY */}
+        <div
+          className={`
+            absolute inset-0 pointer-events-none transition-opacity duration-500
+            ${
+              isDark
+                ? "bg-gradient-to-b from-black/60 via-black/40 to-[#022b1b]/80"
+                : "bg-gradient-to-b from-black/10 via-black/5 to-transparent"
+            }
+          `}
+        />
+
+        {/* CONTENT */}
+        <div className="relative z-10 h-full flex items-center">
+          <div className="container mx-auto px-4">
+            <Hero
+              title={t("home.heroTitle")}
+              subtitle={t("home.heroSubtitle")}
+            />
+          </div>
         </div>
-      </div>
-
-      {/* Featured Products (dynamic) */}
-      <section className="container mx-auto px-4">
-        <FeaturedProducts />
       </section>
 
-      {/* Articles + AI Assistant */}
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row gap-8 items-stretch">
-          <Articles header="Top Articles" items={articles} />
-          <AiAssistant />
-        </div>
+      {/* ===================== MAIN CONTENT ===================== */}
+      <div className="flex-1">
+        {/* CATEGORIES */}
+        <section className={isDark ? "py-10" : "py-12"}>
+          <div className="container mx-auto px-4">
+            <CategoriesSection
+              header={t("home.shopByCategory")}
+              items={categories}
+            />
+          </div>
+        </section>
+
+        {/* FEATURED PRODUCTS */}
+        <section className="pb-10">
+          <div className="container mx-auto px-4">
+            <FeaturedProducts />
+          </div>
+        </section>
+
+        {/* ARTICLES */}
+        {articles.length > 0 && (
+          <section className="pb-10">
+            <div className="container mx-auto px-4">
+              <Articles header={t("home.topArticles")} items={articles} />
+            </div>
+          </section>
+        )}
+
+        {/* ECO BANNER */}
+        <section className="pb-14">
+          <div className="container mx-auto px-4">
+            <EcoBanner
+              title={t("home.ecoBannerTitle")}
+              text={t("home.ecoBannerText")}
+            />
+          </div>
+        </section>
       </div>
 
-      {/* Eco Banner */}
-      <EcoBanner
-        title="Spring Planting Sale"
-        text="Get up to 20% off all seeds and fertilizers. Stock up now for a bountiful harvest!"
-        bg="https://lh3.googleusercontent.com/aida-public/AB6AXuD8A3yXLwfO6ky-87JjNALS51VJCW0bPghXtMja2AcS-Hc5lGk9yLi6rqptiT0ZWriq8XbZh7113-7bon8bjXa9ILgc17YfLL2d1pSjfLQWnkMUGmbE5U_M2ne3bK9lEKk_r03TOZC0NK903XXGf2Z4zeVqPwLxMzNl_7-FISV41iS2eLPChiJ5dz4g38q1cBEMCKS3rxf5El1xu2QTkcCSszzfd7sr9SCxUZ0DH5qtTwKY-JRLBfWSUOoqAOmnmDhvQvUg-dKKxRk"
-      />
-
-      {/* Footer */}
+      {/* FOOTER */}
       <Footer />
     </main>
   );

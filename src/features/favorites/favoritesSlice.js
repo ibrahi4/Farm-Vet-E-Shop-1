@@ -1,33 +1,137 @@
+// src/features/favorites/favoritesSlice.js
 import { createSlice } from "@reduxjs/toolkit";
+import { saveUserFavorites } from "../../services/userDataService";
+import { ensureProductLocalization } from "../../utils/productLocalization";
 
-const initialFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+// Helper function to get user-specific favorites key
+const getFavoritesKey = (userId) => {
+  if (!userId) return "favoritesItems";
+  return `favoritesItems_${userId}`;
+};
+
+// Get current user from localStorage (temporary solution until we have proper auth state)
+const getCurrentUserId = () => {
+  try {
+    const authUser = JSON.parse(localStorage.getItem("authUser") || "null");
+    return authUser?.uid || null;
+  } catch {
+    return null;
+  }
+};
+
+const currentUserId = getCurrentUserId();
+const rawInitialFavorites = JSON.parse(
+  localStorage.getItem(getFavoritesKey(currentUserId)) || "[]"
+);
+
+// Deep clone initial favorites to prevent reference sharing with cart
+const initialFavorites = Array.isArray(rawInitialFavorites)
+  ? rawInitialFavorites
+      .map((item) => ensureProductLocalization({ ...(item || {}) }))
+      .map((item) => JSON.parse(JSON.stringify(item)))
+  : [];
 
 const favouritesSlice = createSlice({
   name: "favorites",
-  initialState: initialFavorites,
+  initialState: {
+    items: initialFavorites,
+    userId: currentUserId,
+  },
   reducers: {
+    setUser: (state, action) => {
+      state.userId = action.payload?.uid || null;
+      state.loading = true;
+    },
+
+    setFavoritesItems: (state, action) => {
+      // Deep clone to avoid reference sharing with cart
+      state.items = Array.isArray(action.payload) 
+        ? action.payload
+            .map((item) => ensureProductLocalization({ ...(item || {}) }))
+            .map((item) => JSON.parse(JSON.stringify(item)))
+        : [];
+      state.loading = false;
+    },
+
+    clearUserData: (state) => {
+      state.items = [];
+      state.userId = null;
+      state.loading = false;
+    },
+
     toggleFavourite: (state, action) => {
-      const exists = state.find((item) => item.id === action.payload.id);
+      const payload = ensureProductLocalization(action.payload || {});
+      const productId = String(payload?.id || '');
+
+      // Check if already in favorites by id only
+      const exists = state.items.find((item) => String(item?.id) === productId);
 
       if (exists) {
-        // remove
-        const updated = state.filter((i) => i.id !== action.payload.id);
-        localStorage.setItem("favorites", JSON.stringify(updated));
-        return updated;
+        // Remove from favorites
+        state.items = state.items.filter((i) => String(i?.id) !== productId);
       } else {
-        // add
-        const updated = [...state, action.payload];
-        localStorage.setItem("favorites", JSON.stringify(updated));
-        return updated;
+        // Add to favorites with a deep clone to avoid reference sharing
+        const fav = JSON.parse(JSON.stringify(payload));
+        state.items = [...state.items, fav];
+      }
+
+      // Persist to user-specific localStorage key
+      const key = getFavoritesKey(state.userId);
+      try {
+        localStorage.setItem(key, JSON.stringify(state.items));
+      } catch (e) {
+        console.warn("Failed to persist favorites to localStorage", e);
+      }
+
+      // Save to Firebase (best-effort)
+      if (state.userId) {
+        saveUserFavorites(state.userId, state.items).catch(console.error);
       }
     },
 
-    clearFavourites: () => {
-      localStorage.removeItem("favorites");
-      return [];
+    removeFavourite: (state, action) => {
+      const payload = action.payload || {};
+      const productId = String(payload?.id || '');
+
+      state.items = state.items.filter((item) => String(item?.id) !== productId);
+
+      const key = getFavoritesKey(state.userId);
+      try {
+        localStorage.setItem(key, JSON.stringify(state.items));
+      } catch (e) {
+        console.warn("Failed to persist favorites to localStorage", e);
+      }
+
+      if (state.userId) {
+        saveUserFavorites(state.userId, state.items).catch(console.error);
+      }
+    },
+
+    clearFavourites: (state) => {
+      state.items = [];
+
+      // Persist to localStorage
+      const key = getFavoritesKey(state.userId);
+      try {
+        localStorage.setItem(key, JSON.stringify([]));
+      } catch (e) {
+        console.warn("Failed to persist favorites to localStorage", e);
+      }
+
+      // Clear from Firebase
+      if (state.userId) {
+        saveUserFavorites(state.userId, []).catch(console.error);
+      }
     },
   },
 });
 
-export const { toggleFavourite, clearFavourites } = favouritesSlice.actions;
+export const {
+  setUser,
+  clearUserData,
+  setFavoritesItems,
+  toggleFavourite,
+  removeFavourite,
+  clearFavourites,
+} = favouritesSlice.actions;
 export default favouritesSlice.reducer;

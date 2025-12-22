@@ -1,3 +1,4 @@
+//  src/main.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -7,6 +8,7 @@ import ThemeProvider from "./theme/ThemeProvider.jsx";
 import App from "./App.jsx";
 import "./index.css";
 import { store } from "./redux/store";
+import "./i18n";
 
 const queryClient = new QueryClient();
 
