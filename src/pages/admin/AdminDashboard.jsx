@@ -16,6 +16,10 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts";
 import {
   Package,
@@ -24,7 +28,10 @@ import {
   DollarSign,
   RefreshCw,
   Sparkles,
-  PackageCheck,
+  Repeat,
+  TrendingUp,
+  PackageX,
+  AlertTriangle,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -32,10 +39,14 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [analysis, setAnalysis] = useState("جاري تحليل البيانات...");
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [userNameMap, setUserNameMap] = useState({});
+  const [emailMap, setEmailMap] = useState({});
+  const [phoneMap, setPhoneMap] = useState({});
+  const [usernameMap, setUsernameMap] = useState({});
+  const { theme } = UseTheme();
+  const isDark = theme === "dark";
 
   // الحسابات الديناميكية
   const stats = useMemo(() => {
@@ -45,7 +56,6 @@ export default function AdminDashboard() {
     const lowStockCount = products.filter(
       (p) => (p.stock || 0) > 0 && (p.stock || 0) <= 5
     ).length;
-
     const totalUsers = users.length;
     const totalOrders = orders.length;
     const totalSales = orders.reduce((sum, o) => sum + (o.totalValue || 0), 0);
@@ -54,7 +64,14 @@ export default function AdminDashboard() {
 
     const customerMap = {};
     orders.forEach((o) => {
-      const uid = o.uid || o.userId || o.phone || o.email || "unknown_" + o.id;
+      const uid =
+        o.uid ||
+        o.userId ||
+        o.username ||
+        o.userName ||
+        o.phone ||
+        o.email ||
+        "unknown_" + o.id;
       if (!customerMap[uid]) customerMap[uid] = { orders: 0, revenue: 0 };
       customerMap[uid].orders += 1;
       customerMap[uid].revenue += o.totalValue || 0;
@@ -69,6 +86,8 @@ export default function AdminDashboard() {
             100
           ).toFixed(1)
         : "0";
+    const totalCustomers = Object.keys(customerMap).length;
+    const repeatCount = repeatCustomers.length;
 
     return {
       totalProducts,
@@ -81,6 +100,8 @@ export default function AdminDashboard() {
       avgOrderValue,
       repeatRate,
       customerMap,
+      totalCustomers,
+      repeatCount,
     };
   }, [products, users, orders]);
 
@@ -111,7 +132,12 @@ export default function AdminDashboard() {
 
     const topCustomers = Object.entries(stats.customerMap)
       .map(([uid, info]) => ({
-        customer: userNameMap[uid] || "مستخدم",
+        customer:
+          userNameMap[uid] ||
+          usernameMap[uid] ||
+          phoneMap[uid] ||
+          emailMap[uid] ||
+          "Customer",
         revenue: info.revenue,
       }))
       .sort((a, b) => b.revenue - a.revenue)
@@ -122,52 +148,84 @@ export default function AdminDashboard() {
       (p) => p.stock > 0 && p.stock <= 5
     );
 
+    const pieData = [
+      { name: "Repeat Customers", value: stats.repeatCount },
+      {
+        name: "New Customers",
+        value: stats.totalCustomers - stats.repeatCount,
+      },
+    ];
+
     return {
       dailySales,
       productSales,
       topCustomers,
       lowStockProducts,
+      pieData,
     };
-  }, [stats, orders, products]);
+  }, [stats, orders, products, userNameMap, emailMap, phoneMap, usernameMap]);
 
   const fetchAllData = async () => {
     setLoading(true);
-    const usersRef = collection(db, "users");
-    const usersSnap = await getDocs(usersRef);
     try {
-      const [productsSnap, catsSnap, ordersSnap] = await Promise.all([
+      const usersRef = collection(db, "users");
+      const usersSnap = await getDocs(usersRef);
+      const [productsSnap, ordersSnap] = await Promise.all([
         getDocs(
           query(collection(db, "products"), orderBy("createdAt", "desc"))
         ),
-        getDocs(collection(db, "categories")),
-
         getDocs(query(collection(db, "orders"), orderBy("createdAt", "desc"))),
       ]);
 
       setProducts(
         productsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       );
-      setCategories(
-        catsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-      );
+
       const usersList = usersSnap.docs.map((doc) => {
         const data = doc.data() || {};
-
         return {
           id: doc.id,
-          fullName: data.fullName || data.name || "مستخدم",
-          email: data.email || "غير متوفر",
-          createdAt: data.createdAt?.toDate
-            ? data.createdAt.toDate()
-            : new Date(data.createdAt || Date.now()),
+          uid: data.uid || doc.id,
+          fullName:
+            data.fullName ||
+            data.name ||
+            data.username ||
+            data.userName ||
+            "Customer",
+          email: data.email || "unknown@email",
+          phone: data.phone || "unknown_phone",
+          username: data.username || data.userName || "unknown_username",
         };
       });
-
       setUsers(usersList);
-      const nameMap = Object.fromEntries(
-        usersList.map((u) => [u.id, u.fullName])
-      );
+
+      const nameMap = {};
+      usersList.forEach((u) => {
+        if (u.uid) nameMap[u.uid] = u.fullName;
+        nameMap[u.id] = u.fullName; // Add mapping for doc.id as well
+      });
       setUserNameMap(nameMap);
+
+      const emailMapObj = Object.fromEntries(
+        usersList
+          .filter((u) => u.email && u.email !== "unknown@email")
+          .map((u) => [u.email, u.fullName])
+      );
+      setEmailMap(emailMapObj);
+
+      const phoneMapObj = Object.fromEntries(
+        usersList
+          .filter((u) => u.phone && u.phone !== "unknown_phone")
+          .map((u) => [u.phone, u.fullName])
+      );
+      setPhoneMap(phoneMapObj);
+
+      const usernameMapObj = Object.fromEntries(
+        usersList
+          .filter((u) => u.username && u.username !== "unknown_username")
+          .map((u) => [u.username, u.fullName])
+      );
+      setUsernameMap(usernameMapObj);
 
       setOrders(
         ordersSnap.docs.map((doc) => ({
@@ -247,17 +305,51 @@ export default function AdminDashboard() {
                 label="عدد المستخدمين"
                 value={stats.totalUsers}
                 gradient="from-indigo-500 to-purple-600"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={TrendingUp}
+                label="Avg Order Value"
+                value={`${stats.avgOrderValue} EGP`}
+                gradient="from-teal-500 to-cyan-500"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={Repeat}
+                label="Repeat Rate"
+                value={`${stats.repeatRate}%`}
+                gradient="from-lime-500 to-green-500"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={PackageX}
+                label="Out of Stock"
+                value={stats.outOfStock}
+                gradient="from-red-500 to-pink-500"
+                isDark={isDark}
+              />
+              <KPICard
+                icon={AlertTriangle}
+                label="Low Stock"
+                value={stats.lowStockCount}
+                gradient="from-yellow-500 to-orange-500"
+                isDark={isDark}
               />
             </div>
 
-            {/* Main Charts */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-10">
-              <ChartCard title="تريند المبيعات اليومي">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+              <ChartCard title="Daily sales trend" isDark={isDark}>
                 <ResponsiveContainer width="100%" height={400}>
                   <LineChart data={charts.dailySales}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="date" stroke="#94a3b8" />
-                    <YAxis stroke="#94a3b8" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={isDark ? "#334155" : "#e2e8f0"}
+                    />
+                    <XAxis
+                      dataKey="date"
+                      stroke={isDark ? "#94a3b8" : "#475569"}
+                    />
+                    <YAxis stroke={isDark ? "#94a3b8" : "#475569"} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "#1e293b",
@@ -268,9 +360,9 @@ export default function AdminDashboard() {
                     <Line
                       type="monotone"
                       dataKey="amount"
-                      stroke="#22c55e"
+                      stroke="#3b82f6"
                       strokeWidth={4}
-                      dot={{ fill: "#3b82f6", r: 6 }}
+                      dot={{ fill: "#22c55e", r: 6 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -279,8 +371,14 @@ export default function AdminDashboard() {
               <ChartCard title="أفضل المنتجات مبيعًا">
                 <ResponsiveContainer width="100%" height={380}>
                   <BarChart data={charts.productSales} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis type="number" stroke="#94a3b8" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={isDark ? "#334155" : "#e2e8f0"}
+                    />
+                    <XAxis
+                      type="number"
+                      stroke={isDark ? "#94a3b8" : "#475569"}
+                    />
                     <YAxis
                       dataKey="name"
                       type="category"
@@ -290,7 +388,7 @@ export default function AdminDashboard() {
                     <Tooltip />
                     <Bar
                       dataKey="amount"
-                      fill="#f97316"
+                      fill="#6366f1"
                       radius={[0, 12, 12, 0]}
                     />
                   </BarChart>
@@ -314,7 +412,37 @@ export default function AdminDashboard() {
                       fill="#22c55e"
                       radius={[12, 12, 0, 0]}
                     />
+                    <Bar
+                      dataKey="revenue"
+                      fill="#8b5cf6"
+                      radius={[12, 12, 0, 0]}
+                    />
                   </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Customer Types" isDark={isDark}>
+                <ResponsiveContainer width="100%" height={380}>
+                  <PieChart>
+                    <Pie
+                      data={charts.pieData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={150}
+                      label
+                    >
+                      {charts.pieData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={["#10b981", "#3b82f6"][index % 2]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
                 </ResponsiveContainer>
               </ChartCard>
             </div>
@@ -344,12 +472,21 @@ export default function AdminDashboard() {
 
               <div className="bg-gradient-to-br from-green-900/50 to-blue-900/50 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-green-500/30 col-span-2">
                 <div className="flex items-center gap-3 mb-6">
-                  <Sparkles className="text-yellow-400" size={32} />
+                  <Sparkles
+                    className={isDark ? "text-yellow-400" : "text-amber-500"}
+                    size={32}
+                  />
                   <h2 className="text-2xl font-bold">
-                    تحليل الذكاء الاصطناعي اللحظي
+                    AI insights on recent orders
                   </h2>
                 </div>
-                <div className="text-sm leading-relaxed text-gray-200 max-h-96 overflow-y-auto prose prose-invert text-sm">
+                <div
+                  className={`text-sm leading-relaxed max-h-96 overflow-y-auto ${
+                    isDark
+                      ? "text-gray-200 prose prose-invert"
+                      : "text-slate-700"
+                  }`}
+                >
                   {analysis}
                 </div>
               </div>
@@ -367,10 +504,27 @@ function KPICard({ icon: Icon, label, value, gradient }) {
       className={`bg-gradient-to-br ${gradient} p-6 rounded-2xl shadow-2xl hover:scale-105 transition-all duration-300`}
     >
       <div className="flex items-center justify-between mb-3">
-        <p className="text-white/80 text-sm">{label}</p>
-        <Icon size={36} className="opacity-80" />
+        <p
+          className={
+            isDark ? "text-white/80 text-sm" : "text-slate-500 text-sm"
+          }
+        >
+          {label}
+        </p>
+        <Icon
+          size={36}
+          className={isDark ? "opacity-80 text-white" : "text-emerald-500"}
+        />
       </div>
-      <p className="text-3xl font-bold">{value}</p>
+      <p
+        className={
+          isDark
+            ? "text-3xl font-bold text-white"
+            : "text-3xl font-bold text-slate-900"
+        }
+      >
+        {value}
+      </p>
     </div>
   );
 }
