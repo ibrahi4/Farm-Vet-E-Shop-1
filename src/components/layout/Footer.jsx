@@ -4,11 +4,9 @@ import { FaFacebookF, FaInstagram, FaTwitter, FaGlobe } from "react-icons/fa";
 import { UseTheme } from "../../theme/ThemeProvider";
 import { motion as Motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-
 export default function Footer() {
   const { theme } = UseTheme();
   const { t } = useTranslation();
-
   const fadeUp = {
     hidden: { opacity: 0, y: 35 },
     show: (d = 0) => ({
@@ -17,7 +15,6 @@ export default function Footer() {
       transition: { duration: 0.7, delay: d, ease: "easeOut" },
     }),
   };
-
   return (
     <Motion.footer
       variants={fadeUp}
@@ -27,9 +24,11 @@ export default function Footer() {
       className={`
         relative overflow-hidden mt-20
         transition-colors duration-500
-        ${theme === "dark"
-          ? "bg-[#071412] text-[#C7EDE9]"
-          : "bg-[#0F2D2A] text-[#D4F3EE]"}
+        ${
+          theme === "dark"
+            ? "bg-[#071412] text-[#C7EDE9]"
+            : "bg-[#0F2D2A] text-[#D4F3EE]"
+        }
       `}
     >
       {/* ✨ Soft Pattern Background */}
@@ -40,31 +39,24 @@ export default function Footer() {
             "url('https://www.transparenttextures.com/patterns/asfalt-light.png')",
         }}
       />
-
       {/* 🌈 Gradient Glow */}
       <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[420px] h-[420px] rounded-full bg-emerald-500/20 blur-3xl" />
-
       <div className="relative max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-3 gap-12">
-
         {/* 🌿 BRAND SECTION */}
         <div className="space-y-4">
           <h2 className="text-3xl font-extrabold tracking-wide flex items-center gap-2">
             🌿 <span>{t("footer.brandName")}</span>
           </h2>
-
           <p className="text-sm opacity-85 leading-relaxed">
             {t("footer.brandDescription")}
           </p>
-
           <div className="mt-6 h-[2px] w-24 bg-gradient-to-r from-emerald-400 to-transparent rounded-full" />
         </div>
-
         {/* 🧭 NAVIGATION */}
         <div>
           <h3 className="font-bold text-xl mb-4 opacity-95">
             {t("footer.quickLinks")}
           </h3>
-
           <ul className="space-y-3 text-sm">
             {[
               { k: "footer.home", p: "/" },
@@ -84,11 +76,10 @@ export default function Footer() {
                   <span className="relative z-10 group-hover:text-emerald-300">
                     {t(l.k)}
                   </span>
-
                   {/* Underline Animation */}
                   <span
                     className="
-                      absolute left-0 -bottom-0.5 h-[2px] w-0 group-hover:w-full 
+                      absolute left-0 -bottom-0.5 h-[2px] w-0 group-hover:w-full
                       bg-emerald-400 transition-all duration-300
                     "
                   />
@@ -97,13 +88,11 @@ export default function Footer() {
             ))}
           </ul>
         </div>
-
         {/* 🌐 SOCIAL + CONTACT */}
         <div>
           <h3 className="font-bold text-xl mb-4 opacity-95">
             {t("footer.followUs")}
           </h3>
-
           <div className="flex space-x-4 text-xl">
             {[FaGlobe, FaFacebookF, FaInstagram, FaTwitter].map((Icon, idx) => (
               <Motion.a
@@ -124,16 +113,13 @@ export default function Footer() {
               </Motion.a>
             ))}
           </div>
-
           {/* Contact Info */}
           <div className="mt-6 space-y-2 text-sm opacity-80">
             <p>📞 +20 100 000 0000</p>
             <p>📩 support@example.com</p>
           </div>
         </div>
-
       </div>
-
       {/* COPYRIGHT */}
       <div
         className={`

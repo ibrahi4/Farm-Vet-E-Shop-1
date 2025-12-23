@@ -3,7 +3,6 @@ import { motion as Motion } from "framer-motion";
 import { UseTheme } from "../../theme/ThemeProvider";
 
 export default function CategoriesSection({ header, items }) {
-  
   const { theme } = UseTheme();
   const isDark = theme === "dark";
 
@@ -109,7 +108,6 @@ export default function CategoriesSection({ header, items }) {
                 transition-transform duration-[1200ms] ease-out
               "
             ></div>
-
           </Motion.button>
         ))}
       </Motion.div>

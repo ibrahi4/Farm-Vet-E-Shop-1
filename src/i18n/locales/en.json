@@ -39,7 +39,8 @@
       "walletEmail": "Account email",
       "linking": "Linking...",
       "linkWallet": "Link wallet",
-      "saveForLater": "Save this card for next time"
+      "saveForLater": "Save this card for next time",
+      "p.t": "Premium Farm-Vet Products"
     },
     "errors": {
       "holder": "Please enter the card holder name.",
@@ -1034,13 +1035,14 @@
     "notifications": "Notifications"
   },
   "products": {
-    "title": "Products",
+    "title": "Premium Farm-Vet Products",
     "search": "Search products...",
     "sortLabel": "Sort",
     "sort": {
       "createdAt": "Newest",
       "price": "Price",
-      "title": "Alphabetical"
+      "title": "Alphabetical",
+      "allCategories": "All Categories"
     },
     "asc": "Ascending",
     "desc": "Descending",

@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Hero from "./homeCom/hero";
@@ -65,90 +64,73 @@ export default function Home() {
   return (
     <main
       dir={isRTL ? "rtl" : "ltr"}
-      className={`
-        min-h-screen flex flex-col transition-colors duration-500
-        ${
-          isDark
-            ? "bg-[#02130f] bg-gradient-to-b from-[#02130f] via-[#022519] to-[#033624] text-slate-100"
-            : "bg-white text-slate-900"
-        }
-      `}
+      className={`flex flex-col transition-colors duration-500 ${
+        isDark
+          ? "bg-[#02130f] bg-gradient-to-b from-[#02130f] via-[#022519] to-[#033624] text-slate-100"
+          : "bg-white text-slate-900"
+      }`}
     >
-      {/* ===================== HERO VIDEO SECTION ===================== */}
-      <section className="relative w-full overflow-hidden h-[450px] md:h-[520px] lg:h-[580px]">
-        {/* VIDEO BG */}
-        <video
-          src="/VideoProject.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        />
-
-        {/* THEMED OVERLAY */}
+      {/* ===================== HERO IMAGE SECTION ===================== */}
+      <section
+        className="relative w-full h-screen flex items-center justify-center overflow-x-hidden"
+        style={{
+          backgroundImage:
+            "url('https://images.pexels.com/photos/265242/pexels-photo-265242.jpeg?q=85&fit=crop')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        {/* Overlay */}
         <div
-          className={`
-            absolute inset-0 pointer-events-none transition-opacity duration-500
-            ${
-              isDark
-                ? "bg-gradient-to-b from-black/60 via-black/40 to-[#022b1b]/80"
-                : "bg-gradient-to-b from-black/10 via-black/5 to-transparent"
-            }
-          `}
+          className={`absolute inset-0 transition-colors duration-500 ${
+            isDark ? "bg-black/60" : "bg-black/30"
+          }`}
         />
 
-        {/* CONTENT */}
-        <div className="relative z-10 h-full flex items-center">
-          <div className="container mx-auto px-4">
-            <Hero
-              title={t("home.heroTitle")}
-              subtitle={t("home.heroSubtitle")}
-            />
-          </div>
+        {/* Hero Content */}
+        <div className="relative z-10 w-full h-full flex items-center">
+          <Hero title={t("home.heroTitle")} subtitle={t("home.heroSubtitle")} />
         </div>
       </section>
 
-      {/* ===================== MAIN CONTENT ===================== */}
-      <div className="flex-1">
-        {/* CATEGORIES */}
-        <section className={isDark ? "py-10" : "py-12"}>
-          <div className="container mx-auto px-4">
-            <CategoriesSection
-              header={t("home.shopByCategory")}
-              items={categories}
-            />
-          </div>
-        </section>
+      {/* ===================== CATEGORIES ===================== */}
+      <section className={isDark ? "py-10" : "py-12"}>
+        <div className="container mx-auto px-4">
+          <CategoriesSection
+            header={t("home.shopByCategory")}
+            items={categories}
+          />
+        </div>
+      </section>
 
-        {/* FEATURED PRODUCTS */}
+      {/* ===================== FEATURED PRODUCTS ===================== */}
+      <section className="pb-10">
+        <div className="container mx-auto px-4">
+          <FeaturedProducts />
+        </div>
+      </section>
+
+      {/* ===================== ARTICLES ===================== */}
+      {articles.length > 0 && (
         <section className="pb-10">
           <div className="container mx-auto px-4">
-            <FeaturedProducts />
+            <Articles header={t("home.topArticles")} items={articles} />
           </div>
         </section>
+      )}
 
-        {/* ARTICLES */}
-        {articles.length > 0 && (
-          <section className="pb-10">
-            <div className="container mx-auto px-4">
-              <Articles header={t("home.topArticles")} items={articles} />
-            </div>
-          </section>
-        )}
+      {/* ===================== ECO BANNER ===================== */}
+      <section className="pb-14">
+        <div className="container mx-auto px-4">
+          <EcoBanner
+            title={t("home.ecoBannerTitle")}
+            text={t("home.ecoBannerText")}
+          />
+        </div>
+      </section>
 
-        {/* ECO BANNER */}
-        <section className="pb-14">
-          <div className="container mx-auto px-4">
-            <EcoBanner
-              title={t("home.ecoBannerTitle")}
-              text={t("home.ecoBannerText")}
-            />
-          </div>
-        </section>
-      </div>
-
-      {/* FOOTER */}
+      {/* ===================== FOOTER ===================== */}
       <Footer />
     </main>
   );

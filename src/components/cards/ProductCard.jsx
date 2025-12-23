@@ -13,7 +13,10 @@ import { Heart, Eye, Sparkles } from "lucide-react";
 import Button from "../ui/Button";
 import { UseTheme } from "../../theme/ThemeProvider";
 import { useTranslation } from "react-i18next";
-import { getLocalizedProductTitle, ensureProductLocalization } from "../../utils/productLocalization";
+import {
+  getLocalizedProductTitle,
+  ensureProductLocalization,
+} from "../../utils/productLocalization";
 
 export default function ProductCard({ product, index = 0 }) {
   const dispatch = useDispatch();
@@ -77,13 +80,18 @@ export default function ProductCard({ product, index = 0 }) {
           transition: { duration: 0.35, ease: "easeOut" },
         }}
         className={`
-          relative group p-4 rounded-2xl cursor-pointer select-none 
-          transition-all duration-500 overflow-hidden
+  relative group p-4 rounded-2xl cursor-pointer select-none
+  transition-all duration-500 overflow-hidden
 
-          ${isDark
-            ? "bg-[#0f1a1a]/70 border border-emerald-900/50 shadow-[0_20px_40px_rgba(16,185,129,0.28)]"
-            : "bg-white border border-slate-200 shadow-[0_10px_28px_rgba(0,0,0,0.06)]"}
-        `}
+  w-full 
+  max-w-[320px]
+
+  ${
+    isDark
+      ? "bg-[#0f1a1a]/70 border border-emerald-900/50 shadow-[0_20px_40px_rgba(16,185,129,0.28)]"
+      : "bg-white border border-slate-200 shadow-[0_10px_28px_rgba(0,0,0,0.06)]"
+  }
+`}
         onClick={() => navigate(`/product/${product.id}`)}
       >
         {!isAvailable && (
@@ -144,13 +152,15 @@ export default function ProductCard({ product, index = 0 }) {
             whileTap={{ scale: 0.85 }}
             onClick={(e) => {
               e.stopPropagation();
-              dispatch(
-                toggleFavourite(ensureProductLocalization(product))
-              );
+              dispatch(toggleFavourite(ensureProductLocalization(product)));
             }}
             className={`
               p-2 rounded-full backdrop-blur-md shadow-lg border
-              ${isDark ? "bg-black/40 border-emerald-900" : "bg-white/90 border-slate-200"}
+              ${
+                isDark
+                  ? "bg-black/40 border-emerald-900"
+                  : "bg-white/90 border-slate-200"
+              }
             `}
           >
             <Heart
@@ -162,24 +172,6 @@ export default function ProductCard({ product, index = 0 }) {
                   ? "text-emerald-200"
                   : "text-slate-600"
               }
-            />
-          </Motion.button>
-
-          {/* Quick View */}
-          <Motion.button
-            whileTap={{ scale: 0.85 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setQuickView(true);
-            }}
-            className={`
-              p-2 rounded-full backdrop-blur-md shadow-lg border
-              ${isDark ? "bg-black/40 border-emerald-900" : "bg-white/90 border-slate-200"}
-            `}
-          >
-            <Eye
-              size={18}
-              className={isDark ? "text-emerald-200" : "text-blue-600"}
             />
           </Motion.button>
         </div>
@@ -202,8 +194,8 @@ export default function ProductCard({ product, index = 0 }) {
             ${isDark ? "text-emerald-100" : "text-slate-800"}
           `}
         >
-            {displayTitle}
-          </h3>
+          {displayTitle}
+        </h3>
 
         {/* PRICE */}
         <p
@@ -232,11 +224,11 @@ export default function ProductCard({ product, index = 0 }) {
           }
           full
           disabled={inCart || !isAvailable}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (inCart || !isAvailable) return;
-              dispatch(addToCart(ensureProductLocalization(product)));
-            }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (inCart || !isAvailable) return;
+            dispatch(addToCart(ensureProductLocalization(product)));
+          }}
           className={`mt-3 rounded-xl font-semibold ${
             inCart || !isAvailable ? "opacity-50 cursor-not-allowed" : ""
           }`}
@@ -246,7 +238,11 @@ export default function ProductCard({ product, index = 0 }) {
         <button
           className={`
             text-[12px] font-medium mt-2 mx-auto block
-            ${isDark ? "text-emerald-200 hover:text-emerald-100" : "text-emerald-700 hover:text-emerald-900"}
+            ${
+              isDark
+                ? "text-emerald-200 hover:text-emerald-100"
+                : "text-emerald-700 hover:text-emerald-900"
+            }
           `}
           onClick={(e) => {
             e.stopPropagation();
