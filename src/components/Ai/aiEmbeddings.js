@@ -12,7 +12,7 @@ export async function getEmbeddings(items) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer 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", // ضع مفتاحك هنا
+        // Authorization: "Bearer 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", // ضع مفتاحك هنا
       },
       body: JSON.stringify({
         model: "text-embedding-3-small",
