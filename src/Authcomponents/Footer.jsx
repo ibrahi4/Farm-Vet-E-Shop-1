@@ -28,22 +28,23 @@ export default function Footer() {
         relative mt-20 py-14
         backdrop-blur-xl
         transition-all duration-500
-        ${theme === "dark"
-          ? "bg-[#0d1b1b]/95 text-[#B8E4E6]"
-          : "bg-gradient-to-b from-[#1d3a3a]/95 to-[#102323]/95 text-[#DFF7EE]"
+        ${
+          theme === "dark"
+            ? "bg-[#0d1b1b]/95 text-[#B8E4E6]"
+            : "bg-gradient-to-b from-[#1d3a3a]/95 to-[#102323]/95 text-[#DFF7EE]"
         }
       `}
     >
-
       {/* 🌟 Soft Top Glow */}
-      <div className="
+      <div
+        className="
         absolute top-0 left-0 w-full h-16 
         bg-gradient-to-b from-emerald-500/15 to-transparent
         pointer-events-none
-      " />
+      "
+      />
 
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
-
         {/* 🌿 BRAND */}
         <div className="space-y-4">
           <h2 className="text-3xl font-extrabold flex items-center gap-2 tracking-wide">
@@ -59,7 +60,9 @@ export default function Footer() {
 
         {/* 🧭 QUICK LINKS */}
         <div>
-          <h3 className="font-semibold mb-4 text-lg">{t("footer.quickLinks")}</h3>
+          <h3 className="font-semibold mb-4 text-lg">
+            {t("footer.quickLinks")}
+          </h3>
           <ul className="space-y-3 text-sm">
             {[
               { labelKey: "footer.home", path: "/" },
@@ -97,7 +100,6 @@ export default function Footer() {
           <h3 className="font-semibold mb-4 text-lg">{t("footer.followUs")}</h3>
 
           <div className="flex space-x-4 text-xl">
-
             {[FaGlobe, FaFacebookF, FaInstagram, FaTwitter].map((Icon, idx) => (
               <Motion.a
                 key={idx}
@@ -124,9 +126,10 @@ export default function Footer() {
         className={`
           mt-14 pt-6 border-t text-center text-sm 
           transition-all duration-300
-          ${theme === "dark"
-            ? "border-gray-700 text-gray-400"
-            : "border-white/20 text-emerald-100"
+          ${
+            theme === "dark"
+              ? "border-gray-700 text-gray-400"
+              : "border-white/20 text-emerald-100"
           }
         `}
       >

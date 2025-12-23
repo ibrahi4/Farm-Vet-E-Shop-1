@@ -178,7 +178,8 @@
     "categories_title": "لا توجد فئات بعد",
     "try_clear": "جرّب مسح البحث أو تغيير الفلاتر.",
     "create_first_course": "ابدأ بإنشاء أول دورة.",
-    "create_first_category": "أنشئ أول فئة."
+    "create_first_category": "أنشئ أول فئة.",
+       "p.t": "منتجاتنا المتميزة بأعلي جودة وضمان"
   },
   "errors": {
     "courses_load_failed": "فشل تحميل الدورات",
@@ -1027,13 +1028,14 @@
     "notifications": "الإشعارات"
   },
   "products": {
-    "title": "المنتجات",
+    "title": "منتجات فارم فت المتميزة",
     "search": "ابحث عن المنتجات...",
     "sortLabel": "ترتيب",
     "sort": {
       "createdAt": "الأحدث",
       "price": "السعر",
-      "title": "أبجدي"
+      "title": "أبجدي",
+      "allCategories": "جميع الفئات"
     },
     "asc": "تصاعدي",
     "desc": "تنازلي",

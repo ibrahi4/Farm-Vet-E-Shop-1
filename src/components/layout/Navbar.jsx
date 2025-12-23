@@ -55,7 +55,7 @@ export default function Navbar() {
   useEffect(() => {
     if (unreadCount > previousUnreadCountRef.current && !isAdminUser) {
       playFullNotification(
-        `You have ${unreadCount} new notification${unreadCount > 1 ? 's' : ''}`,
+        `You have ${unreadCount} new notification${unreadCount > 1 ? "s" : ""}`,
         currentLang === "ar" ? "ar-EG" : "en-US"
       );
     }
@@ -118,10 +118,8 @@ export default function Navbar() {
 
   const navLinkBase =
     "relative text-sm font-semibold tracking-tight transition-colors duration-300";
-  const navLinkActive =
-    "text-emerald-300 dark:text-emerald-300";
-  const navLinkIdle =
-    "text-[#B8E4E6]/80 hover:text-white";
+  const navLinkActive = "text-emerald-300 dark:text-emerald-300";
+  const navLinkIdle = "text-[#B8E4E6]/80 hover:text-white";
 
   const cartCount = cartItems.reduce(
     (sum, item) => sum + (item?.quantity || 1),
@@ -236,10 +234,7 @@ export default function Navbar() {
             )}
 
             {isAdminUser && (
-              <NavLink
-                className={`${navLinkBase} ${navLinkIdle}`}
-                to="/admin"
-              >
+              <NavLink className={`${navLinkBase} ${navLinkIdle}`} to="/admin">
                 {t("admin.dashboard")}
               </NavLink>
             )}
