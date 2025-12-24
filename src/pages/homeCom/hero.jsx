@@ -21,30 +21,18 @@ export default function Hero({ title, subtitle }) {
   };
 
   return (
-    <div
-      className="
-        relative z-10
-        flex flex-col justify-center
-        h-full
-        px-4 sm:px-6 md:px-10 lg:px-16
-      "
-    >
+    <div className="relative z-10 flex flex-col justify-center min-h-screen px-4 sm:px-6 md:px-10 lg:px-16">
       <Motion.div
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.4 }}
-        className="
-          max-w-3xl w-full mx-auto
-          text-center sm:text-left
-          space-y-4 sm:space-y-6
-          break-words
-        "
+        className="max-w-3xl w-full mx-auto text-center sm:text-left space-y-4 sm:space-y-6 break-words"
       >
         {/* Badge */}
         <Motion.div
           variants={fadeUp}
           custom={0.05}
-          className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs sm:text-sm md:text-base font-medium
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-1 text-xs sm:text-sm md:text-base font-medium
             backdrop-blur-sm border shadow
             ${
               theme === "dark"
@@ -64,8 +52,9 @@ export default function Hero({ title, subtitle }) {
         <Motion.h1
           variants={fadeUp}
           custom={0.15}
-          className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-snug sm:leading-tight
+          className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-extrabold leading-snug sm:leading-tight
             ${theme === "dark" ? "text-emerald-100" : "text-white"}`}
+          style={{ wordBreak: "break-word" }}
         >
           {title}
         </Motion.h1>
@@ -74,7 +63,7 @@ export default function Hero({ title, subtitle }) {
         <Motion.p
           variants={fadeUp}
           custom={0.3}
-          className={`text-sm sm:text-base md:text-lg max-w-xl leading-relaxed
+          className={`text-sm sm:text-base md:text-lg max-w-xl leading-relaxed mx-auto sm:mx-0
             ${theme === "dark" ? "text-emerald-100/80" : "text-white/90"}`}
         >
           {subtitle}
@@ -84,7 +73,7 @@ export default function Hero({ title, subtitle }) {
         <Motion.div
           variants={fadeUp}
           custom={0.5}
-          className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center sm:justify-start mt-4 flex-wrap"
+          className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center sm:justify-start mt-6 sm:mt-8 flex-wrap"
         >
           <Motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
             <Button
@@ -121,11 +110,20 @@ export default function Hero({ title, subtitle }) {
         <Motion.div
           variants={fadeUp}
           custom={0.8}
-          className="mt-6 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 text-xs sm:text-sm md:text-base font-medium"
+          className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 text-xs sm:text-sm md:text-base font-medium"
         >
-          <Feature text="2,500+ trusted farm products" theme={theme} />
-          <Feature text="AI-powered farming insights" theme={theme} />
-          <Feature text="Fast delivery & support" theme={theme} />
+          <Feature
+            text={t("home.feature1", "2,500+ trusted farm products")}
+            theme={theme}
+          />
+          <Feature
+            text={t("home.feature2", "AI-powered farming insights")}
+            theme={theme}
+          />
+          <Feature
+            text={t("home.feature3", "Fast delivery & support")}
+            theme={theme}
+          />
         </Motion.div>
       </Motion.div>
     </div>
@@ -134,8 +132,12 @@ export default function Hero({ title, subtitle }) {
 
 const Feature = ({ text, theme }) => (
   <div className="flex items-center gap-2 justify-center sm:justify-start">
-    <span className="h-2 w-2 bg-emerald-400 rounded-full" />
-    <span className={theme === "dark" ? "text-emerald-100" : "text-white"}>
+    <span className="h-2 w-2 bg-emerald-400 rounded-full shrink-0" />
+    <span
+      className={`break-words ${
+        theme === "dark" ? "text-emerald-100" : "text-white"
+      }`}
+    >
       {text}
     </span>
   </div>

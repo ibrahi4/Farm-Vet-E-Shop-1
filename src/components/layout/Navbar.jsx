@@ -140,6 +140,7 @@ export default function Navbar() {
     location.pathname.startsWith("/delivery");
   if (hideNavbar) return null;
 
+  // Tailwind Colors
   const navbarBg = `
     ${
       isDark
@@ -226,7 +227,7 @@ export default function Navbar() {
             >
               {({ isActive }) => (
                 <span className="inline-flex items-center gap-1">
-                  {t("nav.products", "Products")}
+                  {t("nav.products")}
                   {isActive && (
                     <span className="h-[2px] w-5 rounded-full bg-emerald-400 block" />
                   )}
@@ -319,6 +320,36 @@ export default function Navbar() {
                 </button>
               )}
             </div>
+
+            {!user && (
+              <>
+                <Button
+                  text={t("auth.login")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/login");
+                  }}
+                  className="hidden md:block px-3 py-1 text-sm bg-emerald-500 text-white hover:bg-emerald-400 rounded-xl shadow-[0_6px_18px_rgba(16,185,129,0.45)]"
+                />
+                <Button
+                  text={t("auth.register")}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/register");
+                  }}
+                  className="hidden md:block px-3 py-1 text-sm bg-transparent border border-emerald-400 text-emerald-100 hover:bg-emerald-500/10 rounded-xl"
+                />
+              </>
+            )}
+
+            {user && (
+              <button
+                onClick={handleLogout}
+                className="hidden md:block px-3 py-1 text-sm bg-red-600 text-white rounded-xl hover:bg-red-700 shadow-[0_6px_18px_rgba(220,38,38,0.45)]"
+              >
+                {t("auth.logout")}
+              </button>
+            )}
 
             {/* MOBILE TOGGLE */}
             <button
