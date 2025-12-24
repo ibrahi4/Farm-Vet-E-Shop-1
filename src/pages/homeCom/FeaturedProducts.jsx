@@ -13,7 +13,12 @@ export default function FeaturedProducts() {
   const { theme } = UseTheme();
   const isDark = theme === "dark";
 
-  const { data = [], isLoading, isError, error } = useProductsSorted({
+  const {
+    data = [],
+    isLoading,
+    isError,
+    error,
+  } = useProductsSorted({
     sortBy: "createdAt",
     dir: "desc",
     qText: "",
@@ -37,7 +42,11 @@ export default function FeaturedProducts() {
           onClick={() => navigate("/products")}
           className={`
             font-medium transition
-            ${isDark ? "text-emerald-300 hover:text-emerald-200" : "text-emerald-700 hover:text-emerald-900"}
+            ${
+              isDark
+                ? "text-emerald-300 hover:text-emerald-200"
+                : "text-emerald-700 hover:text-emerald-900"
+            }
           `}
         >
           {t("home.viewAll")}

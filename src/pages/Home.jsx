@@ -1,24 +1,25 @@
+// src/pages/Home.jsx
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import Hero from "./homeCom/hero";
+import Hero from "./homeCom/Hero";
 import CategoriesSection from "./homeCom/CategoriesSection";
 import Articles from "./homeCom/Articles";
 import EcoBanner from "./homeCom/EcoBanner";
-import Footer from "../Authcomponents/Footer";
 import FeaturedProducts from "./homeCom/FeaturedProducts";
+import Footer from "../Authcomponents/Footer";
 import { useCategoriesSorted } from "../hooks/useCategoriesSorted";
 import { localizeArticleRecord } from "../data/articles";
 import useArticles from "../hooks/useArticles";
-import { useTranslation } from "react-i18next";
 import { useCategoryRepresentativeImages } from "../hooks/useCategoryRepresentativeImages";
+import { useTranslation } from "react-i18next";
 import { UseTheme } from "../theme/ThemeProvider";
 
 export default function Home() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const isRTL = i18n.language === "ar";
   const { theme } = UseTheme();
   const isDark = theme === "dark";
+  const isRTL = i18n.language === "ar";
 
   const { data: catData = [] } = useCategoriesSorted({ dir: "desc" });
   const { articles: allFeaturedArticles } = useArticles({ featureHome: true });
@@ -26,7 +27,6 @@ export default function Home() {
   const featuredArticles = allFeaturedArticles.filter(
     (a) => a.status === "published"
   );
-
   const locale = i18n.language || "en";
   const localizedFeatured = featuredArticles.map((article) =>
     localizeArticleRecord(article, locale)
@@ -36,7 +36,6 @@ export default function Home() {
     () => catData.map((c) => c.id).filter(Boolean),
     [catData]
   );
-
   const { data: categoryImages = {} } =
     useCategoryRepresentativeImages(categoryIds);
 
@@ -54,11 +53,7 @@ export default function Home() {
   const articles = localizedFeatured.map((article) => ({
     title: article.title,
     excerpt: article.summary,
-    img:
-      article.heroImage ||
-      `https://dummyimage.com/400x300/0f172a/ffffff&text=${t(
-        "home.articleFallback"
-      )}`,
+    img: article.heroImage || `/ffffff&text=${t("home.articleFallback")}`,
   }));
 
   return (
@@ -70,26 +65,22 @@ export default function Home() {
           : "bg-white text-slate-900"
       }`}
     >
-      {/* ===================== HERO IMAGE SECTION ===================== */}
+      {/* ===================== HERO ===================== */}
       <section
-        className="relative w-full h-screen flex items-center justify-center overflow-x-hidden"
+        className="relative w-full min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden"
         style={{
           backgroundImage:
             "url('https://images.pexels.com/photos/265242/pexels-photo-265242.jpeg?q=85&fit=crop')",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
         }}
       >
-        {/* Overlay */}
         <div
           className={`absolute inset-0 transition-colors duration-500 ${
             isDark ? "bg-black/60" : "bg-black/30"
           }`}
         />
-
-        {/* Hero Content */}
-        <div className="relative z-10 w-full h-full flex items-center">
+        <div className="relative z-10 w-full px-4 sm:px-6 md:px-10 lg:px-16 flex justify-center items-center">
           <Hero title={t("home.heroTitle")} subtitle={t("home.heroSubtitle")} />
         </div>
       </section>
@@ -123,10 +114,7 @@ export default function Home() {
       {/* ===================== ECO BANNER ===================== */}
       <section className="pb-14">
         <div className="container mx-auto px-4">
-          <EcoBanner
-            title={t("home.ecoBannerTitle")}
-            text={t("home.ecoBannerText")}
-          />
+          <EcoBanner />
         </div>
       </section>
 
