@@ -1,7 +1,7 @@
 // src/pages/Home.jsx
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import Hero from "./homeCom/Hero";
+import Hero from "./homeCom/hero";
 import CategoriesSection from "./homeCom/CategoriesSection";
 import Articles from "./homeCom/Articles";
 import EcoBanner from "./homeCom/EcoBanner";
@@ -53,7 +53,11 @@ export default function Home() {
   const articles = localizedFeatured.map((article) => ({
     title: article.title,
     excerpt: article.summary,
-    img: article.heroImage || `/ffffff&text=${t("home.articleFallback")}`,
+    img:
+      article.heroImage ||
+      `https://dummyimage.com/400x300/0f172a/ffffff&text=${t(
+        "home.articleFallback"
+      )}`,
   }));
 
   return (
