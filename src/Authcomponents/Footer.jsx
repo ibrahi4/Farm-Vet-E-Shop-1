@@ -25,7 +25,7 @@ export default function Footer() {
       whileInView="show"
       viewport={{ once: true, amount: 0.2 }}
       className={`
-        relative mt-20 py-14
+        relative mt-10 py-14
         backdrop-blur-xl
         transition-all duration-500
         ${

@@ -15,10 +15,12 @@ import {
   FiCalendar,
 } from "react-icons/fi";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import { ensureProductLocalization, getLocalizedProductTitle } from "../../utils/productLocalization";
+import {
+  ensureProductLocalization,
+  getLocalizedProductTitle,
+} from "../../utils/productLocalization";
 
 export default function OrderInvoice() {
   const { orderId } = useParams();
@@ -111,9 +113,7 @@ export default function OrderInvoice() {
   const formatPaymentMethod = () => {
     const payment = currentOrder.payment || {};
     const brand =
-      payment.brand ||
-      currentOrder.cardBrand ||
-      currentOrder.paymentBrand;
+      payment.brand || currentOrder.cardBrand || currentOrder.paymentBrand;
     const last4 =
       payment.last4 ||
       payment.cardLast4 ||
@@ -152,21 +152,16 @@ export default function OrderInvoice() {
       pdf.setFontSize(14);
       pdf.setTextColor(0, 0, 0);
       pdf.text(
-        `Order #${
-          currentOrder.orderNumber || currentOrder.id.slice(-8)
-        }`,
+        `Order #${currentOrder.orderNumber || currentOrder.id.slice(-8)}`,
         20,
         50
       );
       pdf.text(
-        `Date: ${new Date(currentOrder.createdAt).toLocaleDateString(
-          "en-US",
-          {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }
-        )}`,
+        `Date: ${new Date(currentOrder.createdAt).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })}`,
         20,
         60
       );
@@ -203,9 +198,7 @@ export default function OrderInvoice() {
         110
       );
       pdf.text(
-        currentOrder.country ||
-          currentOrder.shipping?.country ||
-          "Egypt",
+        currentOrder.country || currentOrder.shipping?.country || "Egypt",
         110,
         120
       );
@@ -227,11 +220,7 @@ export default function OrderInvoice() {
       orderItems.forEach((item) => {
         pdf.text(getLocalizedProductTitle(item, lang) || "", 25, yPosition);
         pdf.text(item.quantity?.toString() || "1", 125, yPosition);
-        pdf.text(
-          `${item.price?.toLocaleString() || 0} EGP`,
-          140,
-          yPosition
-        );
+        pdf.text(`${item.price?.toLocaleString() || 0} EGP`, 140, yPosition);
         pdf.text(
           `${(item.price * item.quantity)?.toLocaleString() || 0} EGP`,
           165,
@@ -251,11 +240,7 @@ export default function OrderInvoice() {
       pdf.text(`Subtotal: ${subtotal.toLocaleString()} EGP`, 140, yPosition);
       yPosition += 10;
       if (shipping) {
-        pdf.text(
-          `Shipping: ${shipping.toLocaleString()} EGP`,
-          140,
-          yPosition
-        );
+        pdf.text(`Shipping: ${shipping.toLocaleString()} EGP`, 140, yPosition);
         yPosition += 10;
       }
       if (tax) {
@@ -264,11 +249,7 @@ export default function OrderInvoice() {
       }
       pdf.setFontSize(14);
       pdf.setTextColor(16, 185, 129);
-      pdf.text(
-        `Total: ${total.toLocaleString()} EGP`,
-        140,
-        yPosition + 10
-      );
+      pdf.text(`Total: ${total.toLocaleString()} EGP`, 140, yPosition + 10);
 
       // Payment method
       yPosition += 30;
@@ -280,12 +261,9 @@ export default function OrderInvoice() {
       yPosition += 20;
       pdf.setFontSize(10);
       pdf.setTextColor(128, 128, 128);
-      pdf.text(
-        "Thank you for your business!",
-        105,
-        yPosition,
-        { align: "center" }
-      );
+      pdf.text("Thank you for your business!", 105, yPosition, {
+        align: "center",
+      });
       pdf.text(
         `Invoice generated on ${new Date().toLocaleDateString()}`,
         105,
@@ -294,9 +272,7 @@ export default function OrderInvoice() {
       );
 
       const fileName = `Invoice-${
-        currentOrder?.orderNumber ||
-        currentOrder?.id?.slice(-8) ||
-        "Order"
+        currentOrder?.orderNumber || currentOrder?.id?.slice(-8) || "Order"
       }.pdf`;
       pdf.save(fileName);
 
@@ -335,9 +311,7 @@ export default function OrderInvoice() {
         }
       `}</style>
 
-      <div
-        className={`min-h-screen ${containerBg} py-10 px-4 sm:px-6 lg:px-8`}
-      >
+      <div className={`min-h-screen ${containerBg} py-10 px-4 sm:px-6 lg:px-8`}>
         <div className="max-w-4xl mx-auto invoice-container">
           {/* Outer shell with glow */}
           <div
@@ -355,7 +329,11 @@ export default function OrderInvoice() {
                 <button
                   onClick={() => navigate(-1)}
                   className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold transition-all
-                    ${isDark ? "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900/80" : "bg-white/90 text-emerald-700 hover:bg-emerald-50"}
+                    ${
+                      isDark
+                        ? "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900/80"
+                        : "bg-white/90 text-emerald-700 hover:bg-emerald-50"
+                    }
                     border border-emerald-900/40 shadow-sm`}
                 >
                   <FiArrowLeft className="w-4 h-4" />
@@ -366,7 +344,11 @@ export default function OrderInvoice() {
                   <button
                     onClick={handlePrint}
                     className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold transition-all
-                      ${isDark ? "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900/80" : "bg-white/90 text-emerald-700 hover:bg-emerald-50"}
+                      ${
+                        isDark
+                          ? "bg-emerald-950/60 text-emerald-100 hover:bg-emerald-900/80"
+                          : "bg-white/90 text-emerald-700 hover:bg-emerald-50"
+                      }
                       border border-emerald-900/40 shadow-sm`}
                   >
                     <FiPrinter className="w-4 h-4" />
@@ -400,7 +382,8 @@ export default function OrderInvoice() {
                       Invoice
                     </h1>
                     <p className={`text-sm ${mutedText}`}>
-                      Order #{currentOrder.orderNumber || currentOrder.id.slice(-8)}
+                      Order #
+                      {currentOrder.orderNumber || currentOrder.id.slice(-8)}
                     </p>
 
                     <div className="flex flex-wrap items-center gap-3 mt-2 text-xs sm:text-sm">
@@ -411,34 +394,45 @@ export default function OrderInvoice() {
                           }`}
                         />
                         <span className={mutedText}>
-                          {new Date(
-                            currentOrder.createdAt
-                          ).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
+                          {new Date(currentOrder.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )}
                         </span>
                       </div>
 
-                      <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
-                        currentOrder.status === "Cancelled"
-                          ? "border-rose-500/40 bg-rose-500/10 text-rose-100"
-                          : "border-emerald-500/40 bg-emerald-500/10 text-emerald-100"
-                      }`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${
-                          currentOrder.status === "Cancelled" ? "bg-rose-300" : "bg-emerald-300"
-                        }`} />
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
+                          currentOrder.status === "Cancelled"
+                            ? "border-rose-500/40 bg-rose-500/10 text-rose-100"
+                            : "border-emerald-500/40 bg-emerald-500/10 text-emerald-100"
+                        }`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            currentOrder.status === "Cancelled"
+                              ? "bg-rose-300"
+                              : "bg-emerald-300"
+                          }`}
+                        />
                         {currentOrder.status}
                       </span>
                     </div>
                   </div>
 
                   <div className="text-right space-y-1">
-                    <p className={`text-xs uppercase tracking-wide ${mutedText}`}>
+                    <p
+                      className={`text-xs uppercase tracking-wide ${mutedText}`}
+                    >
                       Total Amount
                     </p>
-                    <p className={`text-2xl sm:text-3xl font-bold ${accentText}`}>
+                    <p
+                      className={`text-2xl sm:text-3xl font-bold ${accentText}`}
+                    >
                       {currentOrder.totals?.total?.toLocaleString() ||
                         currentOrder.total?.toLocaleString()}{" "}
                       EGP
@@ -651,13 +645,19 @@ export default function OrderInvoice() {
                   className={`rounded-2xl p-6 border backdrop-blur-md space-y-4`}
                 >
                   <div
-                    className={`flex items-center gap-3 ${isDark ? "bg-rose-950/60 border-rose-900/60" : "bg-rose-50/60 border-rose-200"}`}
+                    className={`flex items-center gap-3 ${
+                      isDark
+                        ? "bg-rose-950/60 border-rose-900/60"
+                        : "bg-rose-50/60 border-rose-200"
+                    }`}
                   >
                     <div className="flex-1">
                       <h3
                         className={`text-sm font-semibold flex items-center gap-2`}
                       >
-                        <span className={`w-4 h-4 rounded-full flex items-center justify-center text-white`}>
+                        <span
+                          className={`w-4 h-4 rounded-full flex items-center justify-center text-white`}
+                        >
                           ⚠️
                         </span>
                         Order Cancelled
@@ -669,19 +669,23 @@ export default function OrderInvoice() {
                             Reason: {currentOrder.cancellationNote}
                           </span>
                         </div>
-                        {currentOrder.paymentMethod && currentOrder.paymentMethod !== "cod" && (
-                          <div className="flex items-start gap-2">
-                            <span className={`text-rose-500 mt-0.5`}>•</span>
-                            <span className={mutedText}>
-                              💳 Refund: Your payment will be refunded to the original payment method. Please allow 3-5 business days for the refund to process.
-                            </span>
-                          </div>
-                        )}
+                        {currentOrder.paymentMethod &&
+                          currentOrder.paymentMethod !== "cod" && (
+                            <div className="flex items-start gap-2">
+                              <span className={`text-rose-500 mt-0.5`}>•</span>
+                              <span className={mutedText}>
+                                💳 Refund: Your payment will be refunded to the
+                                original payment method. Please allow 3-5
+                                business days for the refund to process.
+                              </span>
+                            </div>
+                          )}
                         {currentOrder.paymentMethod === "cod" && (
                           <div className="flex items-start gap-2">
                             <span className={`text-rose-500 mt-0.5`}>•</span>
                             <span className={mutedText}>
-                              💵 Cash on Delivery: No payment was processed. The delivery was cancelled due to the reason above.
+                              💵 Cash on Delivery: No payment was processed. The
+                              delivery was cancelled due to the reason above.
                             </span>
                           </div>
                         )}

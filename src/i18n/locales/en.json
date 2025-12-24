@@ -105,7 +105,8 @@
     "emptyTitle": "No favorites yet.",
     "browseProducts": "Browse Products",
     "clearAll": "Clear All",
-    "buy": "Buy"
+    "buy": "Buy",
+    "products.buyNow":"Buy Now"
   },
   "auth": {
     "login": "Login",

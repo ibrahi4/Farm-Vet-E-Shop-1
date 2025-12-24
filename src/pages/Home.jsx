@@ -71,7 +71,7 @@ export default function Home() {
     >
       {/* ===================== HERO ===================== */}
       <section
-        className="relative w-full min-h-[60vh] sm:min-h-[80vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden"
+        className="relative w-full min-h-[60vh] sm:min-h-[60vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden"
         style={{
           backgroundImage:
             "url('https://images.pexels.com/photos/265242/pexels-photo-265242.jpeg?q=85&fit=crop')",

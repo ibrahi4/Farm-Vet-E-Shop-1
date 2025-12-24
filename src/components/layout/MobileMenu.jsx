@@ -8,8 +8,7 @@ import {
   FiBell,
   FiTruck,
   FiSettings,
-  FiUserPlus,
-  FiLogIn,
+  FiUser,
 } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 
@@ -52,6 +51,19 @@ export default function MobileMenu({
         >
           <FiFeather className="w-4 h-4" />
           {t("nav.home", "Home")}
+        </button>
+
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setMobileOpen(false);
+            navigate("/products");
+          }}
+          className={`py-2 w-full ${
+            isRTL ? "text-right" : "text-left"
+          } inline-flex items-center gap-2`}
+        >
+          🛒 {t("nav.products", "Products")}
         </button>
 
         <button
@@ -161,7 +173,8 @@ export default function MobileMenu({
                 isRTL ? "text-right" : "text-left"
               } inline-flex items-center gap-2`}
             >
-              👤 {t("navbar.account")}
+              <FiUser className="w-4 h-4" />
+              {t("navbar.account")}
             </button>
             <button
               onClick={(e) => {
@@ -174,37 +187,6 @@ export default function MobileMenu({
               } inline-flex items-center gap-2`}
             >
               🚪 {t("navbar.logout")}
-            </button>
-          </>
-        )}
-
-        {!user && (
-          <>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                setMobileOpen(false);
-                navigate("/login");
-              }}
-              className={`py-2 w-full ${
-                isRTL ? "text-right" : "text-left"
-              } inline-flex items-center gap-2`}
-            >
-              <FiLogIn className="w-4 h-4" />
-              {t("navbar.login")}
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                setMobileOpen(false);
-                navigate("/register");
-              }}
-              className={`py-2 w-full ${
-                isRTL ? "text-right" : "text-left"
-              } inline-flex items-center gap-2`}
-            >
-              <FiUserPlus className="w-4 h-4" />
-              {t("navbar.register")}
             </button>
           </>
         )}
