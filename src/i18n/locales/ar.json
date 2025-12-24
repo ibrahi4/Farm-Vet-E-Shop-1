@@ -1144,7 +1144,8 @@
     "emptyTitle": "لا توجد مفضلات بعد.",
     "browseProducts": "تصفح المنتجات",
     "clearAll": "مسح الكل",
-    "buy": "شراء"
+    "buy": "شراء",
+    "products.buyNow":"اشترِ الآن"
   },
   "cart": {
     "title": "سلة التسوق",
