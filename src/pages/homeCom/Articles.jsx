@@ -28,7 +28,6 @@ export default function Articles({ header, items = [] }) {
 
   return (
     <section className="flex-1 flex flex-col">
-
       {/* عنوان القسم */}
       <Motion.h2
         variants={item}
@@ -36,7 +35,7 @@ export default function Articles({ header, items = [] }) {
         whileInView="show"
         viewport={{ once: true, amount: 0.3 }}
         className="text-[24px] font-bold tracking-tight pb-4 
-                   text-slate-900 dark:text-emerald-100"
+                   text-slate-900 dark:text-emerald-500"
       >
         {header}
       </Motion.h2>
@@ -71,7 +70,6 @@ export default function Articles({ header, items = [] }) {
               dark:border-slate-800
             "
           >
-
             {/* تأثير اللمعة داخل الكارد */}
             <div
               className="
@@ -100,7 +98,6 @@ export default function Articles({ header, items = [] }) {
 
             {/* معلومات المقال */}
             <div className="flex flex-col justify-between py-1 flex-1">
-
               {/* العنوان */}
               <Motion.h3
                 variants={item}

@@ -71,7 +71,7 @@ export default function Home() {
     >
       {/* ===================== HERO ===================== */}
       <section
-        className="relative w-full min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden"
+        className="relative w-full min-h-[80vh] sm:min-h-[85vh] md:min-h-[90vh] flex items-center justify-center overflow-hidden"
         style={{
           backgroundImage:
             "url('https://images.pexels.com/photos/265242/pexels-photo-265242.jpeg?q=85&fit=crop')",
@@ -116,7 +116,7 @@ export default function Home() {
       )}
 
       {/* ===================== ECO BANNER ===================== */}
-      <section className="pb-14">
+      <section className="pb-3">
         <div className="container mx-auto px-4">
           <EcoBanner />
         </div>
