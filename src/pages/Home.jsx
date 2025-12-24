@@ -1,7 +1,7 @@
 // src/pages/Home.jsx
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import Hero from "./homeCom/Hero";
+import Hero from "./homeCom/hero";
 import CategoriesSection from "./homeCom/CategoriesSection";
 import Articles from "./homeCom/Articles";
 import EcoBanner from "./homeCom/EcoBanner";
