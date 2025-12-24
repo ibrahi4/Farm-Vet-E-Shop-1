@@ -53,7 +53,11 @@ export default function Home() {
   const articles = localizedFeatured.map((article) => ({
     title: article.title,
     excerpt: article.summary,
-    img: article.heroImage || `/ffffff&text=${t("home.articleFallback")}`,
+    img:
+      article.heroImage ||
+      `https://dummyimage.com/400x300/0f172a/ffffff&text=${t(
+        "home.articleFallback"
+      )}`,
   }));
 
   return (
