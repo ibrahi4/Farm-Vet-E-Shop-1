@@ -54,7 +54,10 @@ export default function ChatBot() {
   const formatTime = (date) => {
     if (!date) return "";
     const d = typeof date === "string" ? new Date(date) : date;
-    return d.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
+    return d.toLocaleTimeString("ar-EG", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   // load cached history
@@ -76,7 +79,8 @@ export default function ChatBot() {
 
   // scroll to bottom
   useEffect(() => {
-    if (messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current)
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
 
   // Listen for chatbot:open event from product pages
@@ -98,7 +102,8 @@ export default function ChatBot() {
   // timestamp tracking
   useEffect(() => {
     setMeta((prev) => {
-      if (messages.length > prev.length) return [...prev, { createdAt: new Date() }];
+      if (messages.length > prev.length)
+        return [...prev, { createdAt: new Date() }];
       return prev;
     });
   }, [messages.length]);
@@ -131,8 +136,11 @@ export default function ChatBot() {
       <Motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`rounded-2xl p-3 mb-3 flex gap-3 shadow-md border cursor-pointer ${isDark ? "bg-[#0f1d1d] border-white/10 text-[#e8f7f6]" : "bg-white border-gray-200 text-gray-900"
-          }`}
+        className={`rounded-2xl p-3 mb-3 flex gap-3 shadow-md border cursor-pointer ${
+          isDark
+            ? "bg-[#0f1d1d] border-white/10 text-[#e8f7f6]"
+            : "bg-white border-gray-200 text-gray-900"
+        }`}
         onClick={() => navigate(`/product/${product.id}`)}
       >
         <img
@@ -145,17 +153,30 @@ export default function ChatBot() {
             <p className="font-semibold text-sm truncate" title={product.title}>
               {product.title}
             </p>
-            <span className={`text-sm font-bold ${isDark ? "text-[#7fd5c4]" : "text-teal-700"}`}>
+            <span
+              className={`text-sm font-bold ${
+                isDark ? "text-[#7fd5c4]" : "text-teal-700"
+              }`}
+            >
               {product.price} EGP
             </span>
           </div>
           <p className="text-xs text-gray-500 line-clamp-2">
-            {(product.description || product.descriptionAr || "").slice(0, 120) || "منتج متاح الآن"}
+            {(product.description || product.descriptionAr || "").slice(
+              0,
+              120
+            ) || "منتج متاح الآن"}
           </p>
           <div className="flex gap-2">
-            {product.tag && <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px]">{product.tag}</span>}
+            {product.tag && (
+              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px]">
+                {product.tag}
+              </span>
+            )}
             {product.stock && (
-              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px]">{product.stock} in stock</span>
+              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px]">
+                {product.stock} in stock
+              </span>
             )}
           </div>
           <div className="flex gap-2">
@@ -164,8 +185,11 @@ export default function ChatBot() {
                 e.stopPropagation();
                 navigate(`/product/${product.id}`);
               }}
-              className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border ${isDark ? "border-white/20 text-[#cfe9ea]" : "border-teal-200 text-teal-700"
-                }`}
+              className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border ${
+                isDark
+                  ? "border-white/20 text-[#cfe9ea]"
+                  : "border-teal-200 text-teal-700"
+              }`}
             >
               <FiExternalLink size={12} /> View
             </button>
@@ -174,8 +198,9 @@ export default function ChatBot() {
                 e.stopPropagation();
                 dispatch(addToCart({ ...product }));
               }}
-              className={`text-xs px-3 py-1.5 rounded-md ${isDark ? "bg-[#154b3f] text-white" : "bg-teal-600 text-white"
-                }`}
+              className={`text-xs px-3 py-1.5 rounded-md ${
+                isDark ? "bg-[#154b3f] text-white" : "bg-teal-600 text-white"
+              }`}
             >
               Add to Cart
             </button>
@@ -197,7 +222,10 @@ export default function ChatBot() {
       const before = clean.substring(lastIndex, match.index);
       if (before.trim()) {
         parts.push(
-          <p key={lastIndex} className="mb-2 whitespace-pre-wrap leading-relaxed">
+          <p
+            key={lastIndex}
+            className="mb-2 whitespace-pre-wrap leading-relaxed"
+          >
             {before}
           </p>
         );
@@ -210,7 +238,10 @@ export default function ChatBot() {
     const after = clean.substring(lastIndex);
     if (after.trim()) {
       parts.push(
-        <p key={`${lastIndex}-end`} className="whitespace-pre-wrap leading-relaxed">
+        <p
+          key={`${lastIndex}-end`}
+          className="whitespace-pre-wrap leading-relaxed"
+        >
           {after}
         </p>
       );
@@ -249,7 +280,9 @@ export default function ChatBot() {
       >
         <FiMessageCircle size={24} />
         {unread > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-[10px] rounded-full px-1.5 py-0.5">{unread}</span>
+          <span className="absolute -top-1 -right-1 bg-red-500 text-[10px] rounded-full px-1.5 py-0.5">
+            {unread}
+          </span>
         )}
       </Motion.button>
 
@@ -260,24 +293,42 @@ export default function ChatBot() {
             dragMomentum={false}
             dragElastic={0.12}
             ref={chatRef}
-            className={`fixed z-50 rounded-3xl shadow-2xl overflow-hidden flex flex-col border ${isDark ? "bg-[#0b1313] border-white/10" : "bg-[#f8faf9] border-gray-200"
-              }`}
-            style={{ width: size.width, height: size.height, bottom: "120px", right: "50px" }}
+            className={`fixed z-50 rounded-3xl shadow-2xl overflow-hidden flex flex-col border ${
+              isDark
+                ? "bg-[#0b1313] border-white/10"
+                : "bg-[#f8faf9] border-gray-200"
+            }`}
+            style={{
+              width: size.width,
+              height: size.height,
+              bottom: "120px",
+              right: "50px",
+            }}
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.85 }}
           >
-            <div onMouseDown={startResize} className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize bg-transparent" />
+            <div
+              onMouseDown={startResize}
+              className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize bg-transparent"
+            />
 
             <div
-              className={`flex items-center justify-between px-4 py-3 ${isDark ? "bg-[#0f2d2a] text-white" : "bg-gradient-to-r from-teal-600 to-emerald-500 text-white"
-                }`}
+              className={`flex items-center justify-between px-4 py-3 ${
+                isDark
+                  ? "bg-[#0f2d2a] text-white"
+                  : "bg-gradient-to-r from-teal-600 to-emerald-500 text-white"
+              }`}
             >
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-sm font-semibold">AI</div>
+                <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-sm font-semibold">
+                  AI
+                </div>
                 <div>
                   <p className="text-sm font-semibold">FarmVet Assistant</p>
-                  <p className="text-[11px] opacity-80">اسأل عن المنتجات أو اطلب ترشيحات</p>
+                  <p className="text-[11px] opacity-80">
+                    اسأل عن المنتجات أو اطلب ترشيحات
+                  </p>
                 </div>
               </div>
 
@@ -317,7 +368,11 @@ export default function ChatBot() {
                     -
                   </button>
                 </div>
-                <FiX size={20} className="cursor-pointer" onClick={() => setOpen(false)} />
+                <FiX
+                  size={20}
+                  className="cursor-pointer"
+                  onClick={() => setOpen(false)}
+                />
               </div>
             </div>
 
@@ -327,25 +382,36 @@ export default function ChatBot() {
                   key={m.id || i}
                   initial={{ opacity: 0, x: m.role === "user" ? 35 : -35 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className={`max-w-[88%] ${m.role === "user" ? "ml-auto" : "mr-auto"}`}
+                  className={`max-w-[88%] ${
+                    m.role === "user" ? "ml-auto" : "mr-auto"
+                  }`}
                 >
-                  <div className={`text-[10px] text-gray-400 mb-1 ${m.role === "user" ? "text-right" : "text-left"}`}>
+                  <div
+                    className={`text-[10px] text-gray-400 mb-1 ${
+                      m.role === "user" ? "text-right" : "text-left"
+                    }`}
+                  >
                     {formatTime(meta[i]?.createdAt)}
                   </div>
                   <div
-                    className={`p-3 rounded-2xl shadow-sm border ${m.role === "user"
+                    className={`p-3 rounded-2xl shadow-sm border ${
+                      m.role === "user"
                         ? "bg-teal-600 text-white border-transparent rounded-br-sm"
                         : isDark
-                          ? "bg-[#132221] text-[#e4f4f2] border-white/10 rounded-bl-sm"
-                          : "bg-white text-gray-900 border-gray-200 rounded-bl-sm"
-                      }`}
+                        ? "bg-[#132221] text-[#e4f4f2] border-white/10 rounded-bl-sm"
+                        : "bg-white text-gray-900 border-gray-200 rounded-bl-sm"
+                    }`}
                   >
                     {renderMessage(m.content)}
                   </div>
                 </Motion.div>
               ))}
 
-              {typing && <p className="text-xs text-gray-500 animate-pulse">المساعد يكتب...</p>}
+              {typing && (
+                <p className="text-xs text-gray-500 animate-pulse">
+                  المساعد يكتب...
+                </p>
+              )}
               <div ref={messagesEndRef} />
             </div>
 
@@ -360,16 +426,22 @@ export default function ChatBot() {
                       handleSend();
                     }
                   }}
-                  className={`flex-1 rounded-xl px-3 py-2 text-sm resize-none outline-none border ${isDark ? "bg-[#0c1313] text-white border-[#1f2d2d]" : "bg-white border-gray-200"
-                    }`}
+                  className={`flex-1 rounded-xl px-3 py-2 text-sm resize-none outline-none border ${
+                    isDark
+                      ? "bg-[#0c1313] text-white border-[#1f2d2d]"
+                      : "bg-white border-gray-200"
+                  }`}
                   rows={2}
                   placeholder="اسأل عن منتج، سعر، أو اطلب ترشيحات..."
                 />
                 <button
                   onClick={handleSend}
                   disabled={!input.trim()}
-                  className={`px-4 rounded-xl flex items-center justify-center ${input.trim() ? "bg-teal-600 text-white" : "bg-gray-200 text-gray-500"
-                    }`}
+                  className={`px-4 rounded-xl flex items-center justify-center ${
+                    input.trim()
+                      ? "bg-teal-600 text-white"
+                      : "bg-gray-200 text-gray-500"
+                  }`}
                 >
                   <FiSend size={18} />
                 </button>

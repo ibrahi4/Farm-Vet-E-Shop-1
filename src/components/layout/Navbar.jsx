@@ -6,7 +6,6 @@ import { selectCurrentUser, signOut } from "../../features/auth/authSlice";
 import { UseTheme } from "../../theme/ThemeProvider";
 import { motion as Motion } from "framer-motion";
 import React from "react";
-
 import {
   FiHeart,
   FiShoppingCart,
@@ -58,7 +57,7 @@ const CartButton = React.memo(({ navigate, cartCount }) => (
   >
     <FiShoppingCart size={18} />
     {cartCount > 0 && (
-      <span className="absolute -top-1 rtl:left-1 rtl:right-0 bg-cyan-600 text-xs rounded-full ">
+      <span className="absolute -top-1 rtl:left-1 rtl:right-0 bg-cyan-600 text-xs rounded-full px-1">
         {cartCount}
       </span>
     )}
@@ -73,7 +72,7 @@ const NotificationsButton = React.memo(({ navigate, unreadCount }) => (
   >
     <FiBell size={18} />
     {unreadCount > 0 && (
-      <span className="absolute -top-1 rtl:left-1 rtl:right-0 min-w-[18px]  py-0.5 text-[10px] font-semibold rounded-full bg-red-500 text-white">
+      <span className="absolute -top-1 rtl:left-1 rtl:right-0 min-w-[18px] py-0.5 text-[10px] font-semibold rounded-full bg-red-500 text-white">
         {unreadCount > 9 ? "9+" : unreadCount}
       </span>
     )}
@@ -85,7 +84,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [currentLang, setCurrentLang] = useState(i18n.language || "en");
   const previousUnreadCountRef = useRef(0);
-
   const { theme, toggle } = UseTheme();
   const user = useSelector(selectCurrentUser);
   const cartItems = useSelector((state) => state.cart?.items || []);
@@ -138,6 +136,7 @@ export default function Navbar() {
     ["/login", "/register", "/reset"].includes(location.pathname) ||
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/delivery");
+
   if (hideNavbar) return null;
 
   // Tailwind Colors
@@ -171,7 +170,7 @@ export default function Navbar() {
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: "easeOut" }}
-          className="flex items-center gap-4 py-3"
+          className="flex items-center gap-4 py-3 flex-wrap md:flex-nowrap"
         >
           {/* LOGO */}
           <div className="flex items-center gap-4 flex-shrink-0">
@@ -189,7 +188,6 @@ export default function Navbar() {
               </span>
             </NavLink>
           </div>
-
           {/* DESKTOP NAV */}
           <nav
             className={`hidden md:flex items-center gap-6 text-sm font-semibold ${
@@ -270,14 +268,12 @@ export default function Navbar() {
               </NavLink>
             )}
           </nav>
-
           {/* DESKTOP SEARCH */}
-          <div className="hidden lg:block flex-1">
+          <div className="hidden lg:block flex-1 px-4">
             <SearchBar placeholder={t("navbar.search_placeholder")} />
           </div>
-
           {/* RIGHT CONTROLS */}
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2 ml-auto flex-wrap md:flex-nowrap">
             <button
               onClick={toggleLanguage}
               className={`h-9 w-9 rounded-xl flex items-center justify-center ${subtleControlBg}`}
@@ -300,7 +296,6 @@ export default function Navbar() {
                 {t("navbar.toggle_theme", "Toggle theme")}
               </span>
             </button>
-
             <div className="hidden md:flex items-center gap-2">
               {user && (
                 <NotificationsButton
@@ -320,7 +315,6 @@ export default function Navbar() {
                 </button>
               )}
             </div>
-
             {!user && (
               <>
                 <Button
@@ -341,7 +335,6 @@ export default function Navbar() {
                 />
               </>
             )}
-
             {user && (
               <button
                 onClick={handleLogout}
@@ -350,7 +343,6 @@ export default function Navbar() {
                 {t("auth.logout")}
               </button>
             )}
-
             {/* MOBILE TOGGLE */}
             <button
               onClick={() => setMobileOpen((o) => !o)}
@@ -362,7 +354,6 @@ export default function Navbar() {
           </div>
         </Motion.div>
       </div>
-
       {/* MOBILE MENU */}
       {mobileOpen && (
         <MobileMenu

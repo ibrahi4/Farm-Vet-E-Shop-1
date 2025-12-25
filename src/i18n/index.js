@@ -12,8 +12,8 @@ i18n
       en: { translation: en },
       ar: { translation: ar },
     },
-    lng: localStorage.getItem("i18nextLng") || "ar",
-    fallbackLng: "ar",
+    lng: localStorage.getItem("i18nextLng") || "en",
+    fallbackLng: "enh",
     detection: {
       order: ["localStorage", "navigator", "htmlTag"],
       caches: ["localStorage"],
