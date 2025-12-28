@@ -171,20 +171,24 @@ export default function Navbar() {
                 </NavLink>
               )}
             </nav>
-
             {/* RIGHT */}
             <div className="flex items-center gap-3">
-              <div className="hidden lg:block w-64 px-2">
+              {/* Search Bar */}
+              <div
+                className={`hidden lg:block w-64 ${isRTL ? "ml-20" : "mr-20"}`}
+              >
                 <SearchBar />
               </div>
 
+              {/* Theme Toggle */}
               <button
                 onClick={toggle}
-                className={(iconBtn, "px-8 text-emerald-200")}
+                className={(iconBtn, " text-emerald-200")}
               >
                 {theme === "dark" ? <FiSun /> : <FiMoon />}
               </button>
 
+              {/* Language Toggle */}
               <button
                 onClick={async () => {
                   const lang = currentLang === "en" ? "ar" : "en";
@@ -196,7 +200,12 @@ export default function Navbar() {
                 <FiGlobe />
               </button>
 
-              <div className="hidden md:flex gap-2">
+              {/* Icons + Auth Buttons */}
+              <div
+                className={`hidden md:flex items-center gap-2 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
                 {user && (
                   <NotificationsButton
                     navigate={navigate}
@@ -213,8 +222,27 @@ export default function Navbar() {
                     <FiUser />
                   </button>
                 )}
+
+                {/* Login / Register */}
+                {!user && (
+                  <>
+                    <button
+                      onClick={() => navigate("/login")}
+                      className="px-3 py-1 text-sm bg-emerald-500 text-white rounded-xl hover:bg-emerald-400 transition-all duration-200"
+                    >
+                      {t("auth.login")}
+                    </button>
+                    <button
+                      onClick={() => navigate("/register")}
+                      className="px-3 py-1 text-sm border border-emerald-400 text-emerald-400 rounded-xl hover:bg-emerald-100 transition-all duration-200"
+                    >
+                      {t("auth.register")}
+                    </button>
+                  </>
+                )}
               </div>
 
+              {/* Mobile Menu */}
               <button
                 onClick={() => setMobileOpen(true)}
                 className={`md:hidden ${iconBtn}`}
