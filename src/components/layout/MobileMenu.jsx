@@ -9,8 +9,10 @@ import {
   FiTruck,
   FiSettings,
   FiUser,
+  FiSearch,
 } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
+import SearchBar from "../search/SearchBar";
 
 export default function MobileMenu({
   setMobileOpen,
@@ -29,162 +31,118 @@ export default function MobileMenu({
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      className={`lg:hidden border-t border-white/10 ${
-        user?.theme === "dark" ? "bg-[#050909]/98" : "bg-[#102526]/98"
-      } backdrop-blur-sm text-white`}
+      className={`
+        lg:hidden fixed inset-x-0 top-full z-50
+        backdrop-blur-xl
+        border-t border-white/20
+        bg-gradient-to-b
+        from-[#FFF7E6]/95 via-[#FFF1D6]/95 to-[#FFE9B5]/95
+        dark:from-[#0B2F2A]/95 dark:via-[#0E3A34]/95 dark:to-[#0B2F2A]/95
+        text-[#2F2A1F] dark:text-[#D9F3EC]
+        overflow-x-hidden
+      `}
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div
-        className={`px-6 py-4 flex flex-col gap-4 ${
+        className={`px-6 py-6 flex flex-col gap-5 ${
           isRTL ? "text-right items-end" : ""
         }`}
       >
-        {/* Search */}
-        {/* هنا ممكن تضيف SearchBar لو حابب */}
+        {/* 🔍 SEARCH BAR (Centered & Separated) */}
+        <div className="w-full flex justify-center mb-2">
+          <div className="w-full max-w-md">
+            <SearchBar
+              placeholder={t("navbar.search_placeholder")}
+              className="
+                bg-white/70 dark:bg-emerald-900/40
+                border border-amber-300/40 dark:border-emerald-700/40
+                rounded-2xl
+                shadow-[0_8px_30px_rgba(0,0,0,0.12)]
+              "
+            />
+          </div>
+        </div>
 
+        {/* Divider */}
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-black/10 dark:via-white/10 to-transparent my-1" />
+
+        {/* NAV ITEMS */}
+        <MenuButton
+          icon={<FiFeather />}
+          text={t("nav.home", "Home")}
+          onClick={() => navigate("/")}
+          setMobileOpen={setMobileOpen}
+        />
+        <MenuButton
+          icon={<FiShoppingCart />}
+          text={t("nav.products", "Products")}
+          onClick={() => navigate("/products")}
+          setMobileOpen={setMobileOpen}
+        />
+        <MenuButton
+          icon={<FiHeart />}
+          text={t("navbar.favorites")}
+          onClick={() => navigate("/favorites")}
+          setMobileOpen={setMobileOpen}
+        />
+        <MenuButton
+          icon={<FiBook />}
+          text={t("nav.articles", "Articles")}
+          onClick={() => navigate("/articles")}
+          setMobileOpen={setMobileOpen}
+        />
+
+        {/* 🔔 Notifications with badge */}
         <button
           onClick={() => {
             setMobileOpen(false);
-            navigate("/");
-          }}
-          className="flex items-center gap-3 py-2"
-        >
-          <FiFeather className="w-4 h-4" />
-          {t("nav.home", "Home")}
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            setMobileOpen(false);
-            navigate("/products");
-          }}
-          className={`py-2 w-full ${
-            isRTL ? "text-right" : "text-left"
-          } inline-flex items-center gap-2`}
-        >
-          🛒 {t("nav.products", "Products")}
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            setMobileOpen(false);
-            navigate("/favorites");
-          }}
-          className={`py-2 w-full ${
-            isRTL ? "text-right" : "text-left"
-          } inline-flex items-center gap-2`}
-        >
-          <FiHeart className="w-4 h-4" />
-          {t("navbar.favorites")}
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            setMobileOpen(false);
-            navigate("/cart");
-          }}
-          className={`py-2 w-full ${
-            isRTL ? "text-right" : "text-left"
-          } inline-flex items-center gap-2`}
-        >
-          <FiShoppingCart className="w-4 h-4" />
-          {t("navbar.cart")}
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            setMobileOpen(false);
-            navigate("/articles");
-          }}
-          className={`py-2 w-full ${
-            isRTL ? "text-right" : "text-left"
-          } inline-flex items-center gap-2`}
-        >
-          <FiBook className="w-4 h-4" />
-          {t("nav.articles", "Articles")}
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            setMobileOpen(false);
             navigate("/notifications");
           }}
-          className={`py-2 w-full ${
-            isRTL ? "text-right" : "text-left"
-          } flex items-center justify-between`}
+          className="w-full flex items-center justify-between py-2 px-1 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition"
         >
-          <span className="inline-flex items-center gap-2">
-            <FiBell className="w-4 h-4" />
+          <span className="inline-flex items-center gap-3">
+            <FiBell className="w-5 h-5 text-amber-600 dark:text-emerald-300" />
             {t("navbar.notifications")}
           </span>
           {unreadCount > 0 && (
-            <span className="rtl-ml-auto rtl-mr-3 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-xs px-2 py-0.5">
+            <span className="min-w-[22px] text-center rounded-full bg-red-500 text-white text-xs px-2 py-0.5 shadow">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </button>
 
         {(isDeliveryUser || isAdminUser) && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              setMobileOpen(false);
-              navigate("/delivery");
-            }}
-            className={`py-2 w-full ${
-              isRTL ? "text-right" : "text-left"
-            } inline-flex items-center gap-2`}
-          >
-            <FiTruck className="w-4 h-4" />
-            {t("delivery.portal", "Delivery Hub")}
-          </button>
+          <MenuButton
+            icon={<FiTruck />}
+            text={t("delivery.portal", "Delivery Hub")}
+            onClick={() => navigate("/delivery")}
+            setMobileOpen={setMobileOpen}
+          />
         )}
 
         {isAdminUser && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              setMobileOpen(false);
-              navigate("/admin");
-            }}
-            className={`py-2 w-full ${
-              isRTL ? "text-right" : "text-left"
-            } inline-flex items-center gap-2`}
-          >
-            <FiSettings className="w-4 h-4" />
-            {t("admin.dashboard")}
-          </button>
+          <MenuButton
+            icon={<FiSettings />}
+            text={t("admin.dashboard")}
+            onClick={() => navigate("/admin")}
+            setMobileOpen={setMobileOpen}
+          />
         )}
 
         {user && (
           <>
+            <MenuButton
+              icon={<FiUser />}
+              text={t("navbar.account")}
+              onClick={() => navigate("/account/settings")}
+              setMobileOpen={setMobileOpen}
+            />
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                setMobileOpen(false);
-                navigate("/account/settings");
-              }}
-              className={`py-2 w-full ${
-                isRTL ? "text-right" : "text-left"
-              } inline-flex items-center gap-2`}
-            >
-              <FiUser className="w-4 h-4" />
-              {t("navbar.account")}
-            </button>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
+              onClick={() => {
                 handleLogout();
                 setMobileOpen(false);
               }}
-              className={`text-red-400 py-2 w-full ${
-                isRTL ? "text-right" : "text-left"
-              } inline-flex items-center gap-2`}
+              className="mt-2 py-2 px-1 text-red-500 hover:text-red-600 inline-flex items-center gap-3"
             >
               🚪 {t("navbar.logout")}
             </button>
@@ -192,5 +150,26 @@ export default function MobileMenu({
         )}
       </div>
     </Motion.div>
+  );
+}
+
+/* 🔹 Reusable Button (UI only – no logic change) */
+function MenuButton({ icon, text, onClick, setMobileOpen }) {
+  return (
+    <button
+      onClick={() => {
+        setMobileOpen(false);
+        onClick();
+      }}
+      className="
+        w-full inline-flex items-center gap-3
+        py-2 px-1 rounded-xl
+        hover:bg-black/5 dark:hover:bg-white/5
+        transition-colors
+      "
+    >
+      <span className="text-amber-700 dark:text-emerald-300">{icon}</span>
+      <span className="font-medium">{text}</span>
+    </button>
   );
 }
